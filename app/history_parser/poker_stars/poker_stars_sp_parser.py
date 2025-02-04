@@ -18,11 +18,9 @@ class PokerStarsSpanishParser:
         hero_hand = self.extract_hero_hand(hand, game_type)
         actions = self.extract_actions(hand, game_type)
         summary = self.extract_summary(hand, game_type)
-        print(f"summary: {summary}")
         showdown = self.extract_showdown(hand, game_type)
-        print(f"showdown: {showdown}")
         finish_before_showdown = self.extract_finish_before_showdown(hand, game_type)
-        print(f"finish_before_showdown: {finish_before_showdown}")
+        
         parsed_hands.append({
           "general_info": header_info,
           "players": players,
@@ -144,7 +142,7 @@ class PokerStarsSpanishParser:
     result = blinds[:]
     action_phases = ["CARTAS DE MANO", "FLOP", "TURN", "RIVER"]
     patterns = {
-      "zoom": r"(?P<player>\S+): (?P<action>sube|iguala|se retira|pasa|apuesta)(?: (?P<amount1>[\d\.]+) €(?: a (?P<amount2>[\d\.]+) €)?)?",
+      "zoom": r"(?P<player>\S+): (?P<action>sube|iguala|se retira|pasa|apuesta)(?: (?P<amount1>[\d\.]+)(?:\s*[^\d\s])?(?: a (?P<amount2>[\d\.]+)(?:\s*[^\d\s])?)?)?",
       "regular": r"",
       "tournament": r"",
       "sng": r"",
@@ -155,14 +153,17 @@ class PokerStarsSpanishParser:
     if not hand.strip():
       return None
 
+    board_cards = []
 
     for phase in action_phases:
       phase_match = re.search(rf"\*\*\* {phase} \*\*\*(.*?)(?=\*\*\*|$)", hand, re.S)
             
       if phase_match:
         actions = phase_match.group(1).strip()
-        cards_match = re.search(rf"\*\*\* {phase} \*\*\* \[(.*?)\]", hand)
-        cards = cards_match.group(1).split() if cards_match else []
+        cards_match = re.findall(r"\[(.*?)\]", phase_match.group(0).strip())  
+        if cards_match and phase != "CARTAS DE MANO":
+          new_cards = " ".join(cards_match).split()  
+          board_cards = list(dict.fromkeys(board_cards + new_cards)) 
 
         for action_match in re.finditer(pattern, actions):
           action = action_match.group("action")
@@ -174,6 +175,7 @@ class PokerStarsSpanishParser:
             "apuesta": "bet",
           }.get(action, "unknown")
 
+          
           amount = (
             float(action_match.group("amount2"))
             if action_match.group("amount2")
@@ -187,7 +189,7 @@ class PokerStarsSpanishParser:
             "player": action_match.group("player"),
             "action": action_name,
             "amount": amount,
-            "cards": cards
+            "cards": board_cards[:]
           })
 
     return result
@@ -225,7 +227,6 @@ class PokerStarsSpanishParser:
           "amount": float(summary_action_match.group("amount")) if summary_action_match.group("amount") else 0,
         })
       pot_match = re.search(pattern["pot_and_rake"], summary)
-      print(f"POT: {pot_match}")
       pot = float(pot_match.group("pot")) if pot_match.group("pot") else 0
       rake = float(pot_match.group("rake")) if pot_match.group("rake") else 0
       return {
