@@ -18,6 +18,7 @@ class GameStateHandler:
         "FOLD_TO_3BET": 0,
         "FOLD_TO_SQUEEZE": 0,
         "FOLD_TO_4BET": 0,
+        "3BET_OPP": 0,
     }
 
     def __init__(self, player_stats):

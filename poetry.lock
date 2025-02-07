@@ -372,6 +372,18 @@ files = [
 ]
 
 [[package]]
+name = "treys"
+version = "0.1.8"
+description = "treys is a pure Python poker hand evaluation library"
+optional = false
+python-versions = "*"
+groups = ["dev"]
+files = [
+    {file = "treys-0.1.8-py3-none-any.whl", hash = "sha256:9ba3460ff2ed597510fb535af6280f115254b0b70699ea362f8f1ee067378063"},
+    {file = "treys-0.1.8.tar.gz", hash = "sha256:a486a42b899e91985b4da4fdac9a30e638275648977104487acb90a2dd7cd73b"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.12.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -386,4 +398,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9"
-content-hash = "235c42466b1c44a80798d902000c2ee96f54cd5c7806cace9f0d19e0d8f1b2df"
+content-hash = "7ba050e625e3dcee36d9f3d8b4063114e1e5c16e5782c9f85eb696bbbcd2da65"

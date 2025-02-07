@@ -7,9 +7,9 @@ from app.stats_generator.stats_generator import StatsGenerator
 from datetime import datetime
 
 
-router = APIRouter(prefix="/v1", tags=["history"])
+router = APIRouter(prefix="/v1", tags=["stats"])
 
-@router.post("/history", response_model=HandHistoryResponse)
+@router.post("/stats", response_model=HandHistoryResponse)
 async def run(file: UploadFile = File(...)):
     try:
         AVAILABLE_FILE_FORMATS = ["text/plain"]
@@ -23,8 +23,22 @@ async def run(file: UploadFile = File(...)):
         parser = HistoryParser(content_text)
         response = parser.parse()
 
+        stats_generator = StatsGenerator(response)
+        data = stats_generator.execute()
+
+
+        #timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # file_path = f"player_stats_{timestamp}.json"
+
+        # with open(file_path, 'w') as json_file:
+        #     json.dump(data, json_file, indent=4)
+                
+
         return JSONResponse({
-            "data": response,
+            # "filename": file.filename,
+            # "content_type": file.content_type,
+            # "content_preview": content_text[:10000],
+            "data": data,
         })
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading file: {str(e)}")
