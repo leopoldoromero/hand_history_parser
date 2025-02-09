@@ -15,7 +15,7 @@ class PokerStarsSpanishParser:
             continue
         header_info = self.extract_header_info(hand, game_type)
         players = self.extract_players(hand, game_type)
-        hero_hand = self.extract_hero_hand(hand, game_type)
+        hero_name, hero_hand = self.extract_hero_info(hand, game_type)
         actions = self.extract_actions(hand, game_type)
         summary = self.extract_summary(hand, game_type)
         showdown = self.extract_showdown(hand, game_type)
@@ -24,7 +24,8 @@ class PokerStarsSpanishParser:
         parsed_hands.append({
           "general_info": header_info,
           "players": players,
-          "hero_hand": hero_hand,
+          "hero_cards": hero_hand,
+          "hero_name": hero_name,
           "actions": actions,
           "summary": summary,
           "showdown": showdown,
@@ -91,10 +92,10 @@ class PokerStarsSpanishParser:
 
     return players
 
-  def extract_hero_hand(self, hand: str, game_type: str):
+  def extract_hero_info(self, hand: str, game_type: str):
     hero_name = "Nicoromero87"
     patterns = {
-            "zoom": rf'Repartidas a {re.escape(hero_name)} \[(.*?)\]',
+            "zoom": rf'Repartidas a (?P<hero>\S+) \[(.*?)\]',
             "regular": r"",
             "tournament": r"",
             "sng": r"",
@@ -107,7 +108,9 @@ class PokerStarsSpanishParser:
     pattern = patterns[game_type]
     hero_hand_match = re.search(pattern, hand)
     if hero_hand_match:
-        return hero_hand_match.group(1).split() 
+      hero_name = hero_hand_match.group("hero")
+      hero_hand = hero_hand_match.group(2).split() 
+      return hero_name, hero_hand 
 
     return None
 
@@ -142,7 +145,7 @@ class PokerStarsSpanishParser:
     result = blinds[:]
     action_phases = ["CARTAS DE MANO", "FLOP", "TURN", "RIVER"]
     patterns = {
-      "zoom": r"(?P<player>\S+): (?P<action>sube|iguala|se retira|pasa|apuesta)(?: (?P<amount1>[\d\.]+)(?:\s*[^\d\s])?(?: a (?P<amount2>[\d\.]+)(?:\s*[^\d\s])?)?)?",
+      "zoom": r"(?P<player>\S+): (?P<action>sube|iguala|se retira|pasa|apuesta)(?: (?P<amount1>[\d\.]+) (?P<currency>[^\d\s]+)(?: a (?P<amount2>[\d\.]+) (?P=currency))?)?",
       "regular": r"",
       "tournament": r"",
       "sng": r"",
@@ -198,9 +201,9 @@ class PokerStarsSpanishParser:
     players_actions = []
     patterns = {
       "zoom": {
-        "player": r"Asiento (?P<seat>\d+): (?P<name>\S+) (.*?\((?P<amount>[\d\.]+)\s*\S*\))?",
-        "pot_and_rake": r"Bote total\s+(?P<pot>[\d\.]+)\s*\S*\s*\|\s*Comisión\s+(?P<rake>[\d\.]+)\s*\S*"
-      },
+        "player": r"Asiento (?P<seat>\d+): (?P<name>\S+) (.*?\((?P<currency>[^\d\s]+)(?P<amount>[\d\.]+)\))?(?P<details>.*)",
+        "pot_and_rake": r"Bote total (?P<pot>[\d\.]+) (?P<currency>[^\d\s]+) \| Comisión (?P<rake>[\d\.]+) (?P=currency)"
+    },
       "regular": {
         "player": r"",
         "pot_and_rake": r"",
@@ -217,30 +220,38 @@ class PokerStarsSpanishParser:
 
     pattern = patterns[game_type]
     summary_match = re.search(r"\*\*\* RESUMEN \*\*\*(.*?)(?=\*\*\*|$)", hand, re.S)
-    if summary_match:
-      summary = summary_match.group(1).strip()
-      for summary_action_match in re.finditer(pattern["player"], summary):
+    
+    if not summary_match:
+        return None
+
+    summary = summary_match.group(1).strip()
+    players_actions = []
+
+    for match in re.finditer(pattern["player"], summary):
         players_actions.append({
-          "seat": int(summary_action_match.group("seat")),
-          "name": summary_action_match.group("name"),
-          "details": summary_action_match.group(3) if summary_action_match.group(3) else "",
-          "amount": float(summary_action_match.group("amount")) if summary_action_match.group("amount") else 0,
+            "seat": int(match.group("seat")),
+            "name": match.group("name"),
+            "details": match.group("details").strip() if match.group("details") else "",  # Capture details
+            "amount": float(match.group("amount")) if match.group("amount") else 0,
+            "currency": match.group("currency") if match.group("amount") else None
         })
-      pot_match = re.search(pattern["pot_and_rake"], summary)
-      pot = float(pot_match.group("pot")) if pot_match.group("pot") else 0
-      rake = float(pot_match.group("rake")) if pot_match.group("rake") else 0
-      return {
-          "player_actions": players_actions,
-          "pot": pot,
-          "rake": rake
-      }
+
+    pot_match = re.search(pattern["pot_and_rake"], summary)
+    
+    return {
+        "player_actions": players_actions,
+        "pot": float(pot_match.group("pot")) if pot_match else 0,
+        "rake": float(pot_match.group("rake")) if pot_match else 0,
+        "currency": pot_match.group("currency") if pot_match else None
+    }
   
   def extract_showdown(self, hand: str, game_type: str):
     result = {}
     patterns = {
       "zoom": {
         "winner": r"(?P<player>\S+): muestra \[(?P<hand>.*?)\] \((?P<description>.*?)\)",
-        "loser": r"(?P<player>\S+): descarta su mano sin mostrar"
+        "loser": r"(?P<player>\S+): descarta su mano sin mostrar",
+        "collect": r"(?P<player>\S+) se lleva 0.23 (?P<amount>[\d\.]+) (?P<currency>[^\d\s]+) del bote"
       },
       "regular": {
         "winner": r"",
@@ -260,20 +271,36 @@ class PokerStarsSpanishParser:
 
     showdown_section = re.search(r"\*\*\* SHOW DOWN \*\*\*(.*?)(?=\*\*\*|$)", hand, re.S)
     if not showdown_section:
-      return None
+        return None
 
     showdown_text = showdown_section.group(1).strip()
 
-    winner_match = re.search(pattern["winner"], showdown_text)
-    if winner_match:
-      result["winner"] = winner_match.group("player")
-      result["winner_hand"] = winner_match.group("hand").split()
-      result["winner_hand_description"] = winner_match.group("description")
+    winner_match = re.finditer(pattern["winner"], showdown_text)
+    for winner in winner_match:
+        if "winner" not in result:
+            result["winner"] = []
+        result["winner"].append({
+            "player": winner.group("player"),
+            "hand": winner.group("hand").split(),
+            "hand_description": winner.group("description")
+        })
 
-    loser_match = re.search(pattern["loser"], showdown_text)
-    if loser_match:
-      result["loser"] = loser_match.group("player")
-      result["loser_action"] = "muck"  
+    loser_match = re.finditer(pattern["loser"], showdown_text)
+    for loser in loser_match:
+        if "loser" not in result:
+            result["loser"] = []
+        result["loser"].append(loser.group("player"))
+        result["loser_action"] = "muck"
+
+    collect_match = re.finditer(pattern["collect"], showdown_text)
+    for collect in collect_match:
+        if "collector" not in result:
+            result["collector"] = []
+        result["collector"].append({
+            "player": collect.group("player"),
+            "amount": float(collect.group("amount")),
+            "currency": collect.group("currency")
+        })
 
     return result
   
