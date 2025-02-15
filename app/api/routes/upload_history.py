@@ -15,16 +15,18 @@ async def run(file: UploadFile = File(...)):
         AVAILABLE_FILE_FORMATS = ["text/plain"]
 
         if file.content_type not in AVAILABLE_FILE_FORMATS:
-             raise HTTPException(status_code=400, detail=f"Invalid file type. The allowed formats are: {', '.join(AVAILABLE_FILE_FORMATS)}")
+            raise HTTPException(status_code=400, detail=f"Invalid file type. The allowed formats are: {', '.join(AVAILABLE_FILE_FORMATS)}")
 
         content = await file.read()
-        
         content_text = content.decode("utf-8")  
         parser = HistoryParser(content_text)
         response = parser.parse()
 
-        return JSONResponse({
-            "data": response,
-        })
+        return JSONResponse({"data": response})
+    
+    except HTTPException as e:
+        raise e  # Rethrow expected exceptions properly
+    
     except Exception as e:
+        print(f"Unhandled error: {e}")  # Debugging output
         raise HTTPException(status_code=500, detail=f"Error reading file: {str(e)}")

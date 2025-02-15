@@ -5,7 +5,11 @@ class StatsGenerator:
     def __init__(self, hands):
         self.hands = hands
         self.players_stats = defaultdict(lambda: defaultdict(int))
+        self.state_handler = GameStateHandler(self.players_stats)
 
+    def get_pot_type(self): 
+        return self.state_handler.state
+    
     def is_preflop(self, action):
         return action["phase"] == "PRE-FLOP"
     
@@ -16,8 +20,6 @@ class StatsGenerator:
 
     def process_hand(self, hand):
         pre_flop_actions = list(filter(self.is_preflop, hand["actions"]))
-
-        # Extract player order, ensuring blinds act last
         all_players = [action["player"] for action in hand["actions"] if "player" in action]
         small_blind = next((action["player"] for action in hand["actions"] if action["action"] == "small_blind"), None)
         big_blind = next((action["player"] for action in hand["actions"] if action["action"] == "big_blind"), None)
@@ -28,18 +30,15 @@ class StatsGenerator:
         if big_blind:
             players_order.append(big_blind)
 
-        # Initialize StateHandler once per hand
-        state_handler = GameStateHandler(self.players_stats)
-        state_handler.metadata["player_order"] = players_order
+        # state_handler = GameStateHandler(self.players_stats)
+        self.state_handler.metadata["player_order"] = players_order
 
-        # Process pre-flop actions
         for action in pre_flop_actions:
             player = action["player"]
             action_name = action["action"]
-            self.three_bet_opp_handle(action_name, player, state_handler.state)
-            state_handler.handle_action(player, action_name)
+            self.three_bet_opp_handle(action_name, player, self.state_handler.state)
+            self.state_handler.handle_action(player, action_name)
 
-        # Update hands count
         for key in self.players_stats:
           if key in players_order:
             self.players_stats[key]["HANDS"] += 1

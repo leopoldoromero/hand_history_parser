@@ -1,4 +1,6 @@
 import re
+from app.stats_generator.game_state_handler import GameStateHandler
+from collections import defaultdict
 
 class PokerStarsEnglishParser:
   def __init__(self, transcription: str):
@@ -16,20 +18,68 @@ class PokerStarsEnglishParser:
         players = self.extract_players(hand, game_type)
         hero_name, hero_hand = self.extract_hero_info(hand, game_type)
         actions = self.extract_actions(hand, game_type)
-        summary = self.extract_summary(hand, game_type)
+        summary = self.extract_summary(hand, game_type, hero_name)
         showdown = self.extract_showdown(hand, game_type)
         finish_before_showdown = self.extract_finish_before_showdown(hand, game_type)
-        parsed_hands.append({
+        table_name, table_type, button_seat = self.extract_table_and_button_info(hand, game_type)
+        processed_hand = {
           "general_info": header_info,
+          "table_name": table_name,
+          "table_type": table_type,
+          "button_seat": button_seat,
           "players": players,
           "hero_cards": hero_hand,
           "hero_name": hero_name,
+          "hero_seat": summary["hero_seat"],
           "actions": actions,
           "summary": summary,
           "showdown": showdown,
           "finish_before_showdown": finish_before_showdown
-        })
+        }
+        pot_type = self.define_pot_type(processed_hand)
+        
+        processed_hand["summary"]["pot_type"] = pot_type
+        
+        parsed_hands.append(processed_hand)
     return parsed_hands
+  
+  def define_pot_type(self, hand):
+        state_handler = GameStateHandler(defaultdict(lambda: defaultdict(int)))
+        pre_flop_actions = list(filter(lambda action: action["phase"] == "PRE-FLOP", hand["actions"]))
+        all_players = [action["player"] for action in hand["actions"] if "player" in action]
+        small_blind = next((action["player"] for action in hand["actions"] if action["action"] == "small_blind"), None)
+        big_blind = next((action["player"] for action in hand["actions"] if action["action"] == "big_blind"), None)
+
+        players_order = [p for p in all_players if p not in (small_blind, big_blind)]
+        if small_blind:
+            players_order.append(small_blind)
+        if big_blind:
+            players_order.append(big_blind)
+
+        state_handler.metadata["player_order"] = players_order
+
+        for action in pre_flop_actions:
+            player = action["player"]
+            action_name = action["action"]
+            state_handler.handle_action(player, action_name)
+
+        return state_handler.state
+  
+  def extract_table_and_button_info(self, hand: str, game_type: str):
+        patterns = {
+            "zoom": r"Table '(?P<table_name>[\w-]+)' (?P<table_type>[\w-]+) Seat #(?P<button_seat>\d+)",  
+        }
+
+        pattern = patterns[game_type]
+      
+
+        match = re.search(pattern, hand)
+        if match:
+            table_name = match.group("table_name")
+            table_type = match.group("table_type")
+            button_seat = int(match.group("button_seat"))
+
+        return table_name,table_type,button_seat
   
   def extract_header_info(self, hand: str, game_type: str):
     patterns = {
@@ -189,75 +239,115 @@ class PokerStarsEnglishParser:
 
     return result
 
-  def extract_summary(self, hand: str, game_type: str):
-    players_actions = []
-    patterns = {
-        "zoom": {
-          "player": r"Seat (?P<seat>\d+): (?P<name>\S+) (.*?\((?P<currency>[^\d\s]+)(?P<amount>[\d\.]+) in chips\))?(?P<details>.*)",
-          "pot_and_rake": r"Total pot (?P<currency>[^\d\s]+)(?P<pot>[\d\.]+) \| Rake (?P=currency)(?P<rake>[\d\.]+)"
-      },
-        "regular": {
-          "player": r"",
-          "pot_and_rake": r"",
-        },
-        "tournament": {
-          "player": r"",
-          "pot_and_rake": r"",
-        },
-        "sng": {
-          "player": r"",
-          "pot_and_rake": r"",
-        },
-      }
+  def extract_summary(self, hand: str, game_type: str, hero: str):
+          patterns = {
+              "zoom": {
+                  "player": r"Seat (?P<seat>\d+): (?P<name>\S+) (.*?\((?P<currency>[^\d\s]+)(?P<amount>[\d\.]+) in chips\))?(?P<details>.*)",
+                  "pot_and_rake": r"Total pot (?P<currency>[^\d\s]+)(?P<pot>[\d\.]+) \| Rake (?P=currency)(?P<rake>[\d\.]+)",
+                  "winner_no_showdown": r"Seat (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? collected \((?P<currency>[^\d\s]+)(?P<amount>[\d\.]+)\)",
+                  "winner_showdown": r"Seat (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? showed \[(?P<cards>[^\]]+)\] and won \((?P<currency>[^\d\s]+)(?P<amount>[\d\.]+)\)",
+                  "looser_shown": r"Seat (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? muestra \[(?P<cards>[^\]]+)\] y perdió .*",
+                  "looser_discarded": r"Seat (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? mucked \[(?P<cards>[^\]]+)\]",
+                  "community_cards": r"Board \[(?P<cards>[^\]]+)\]",
+                  "hero_fold": rf"Seat (?P<seat>\d+): {hero}(?: \([^)]+\))? folded (?:before (?P<phase_preflop>Flop)|on the (?P<phase_postflop>\w+))"
+              }
+          }
 
-    pattern = patterns[game_type]
-    summary_match = re.search(r"\*\*\* SUMMARY \*\*\*(.*?)(?=\*\*\*|$)", hand, re.S)
-      
-    if not summary_match:
-      return None
+          pattern = patterns[game_type]
+          summary_match = re.search(r"\*\*\* SUMMARY \*\*\*(.*?)(?=\*\*\*|$)", hand, re.S)
 
-    summary = summary_match.group(1).strip()
-    players_actions = []
+          if not summary_match:
+              return None
 
-    for match in re.finditer(pattern["player"], summary):
-      players_actions.append({
-        "seat": int(match.group("seat")),
-        "name": match.group("name"),
-        "details": match.group("details").strip() if match.group("details") else "",  # Capture details
-        "amount": float(match.group("amount")) if match.group("amount") else 0,
-        "currency": match.group("currency") if match.group("amount") else None
-      })
+          summary = summary_match.group(1).strip()
+          players_actions = []
 
-    pot_match = re.search(pattern["pot_and_rake"], summary)
-      
-    return {
-      "player_actions": players_actions,
-      "pot": float(pot_match.group("pot")) if pot_match else 0,
-      "rake": float(pot_match.group("rake")) if pot_match else 0,
-      "currency": pot_match.group("currency") if pot_match else None
-    }
+          for match in re.finditer(pattern["player"], summary):
+              player_name = match.group("name")
+              player_seat = int(match.group("seat"))
+              if player_name == hero:
+                hero_seat = player_seat
+              players_actions.append({
+                  "seat": player_seat,
+                  "name": player_name,
+                  "details": match.group("details").strip(),
+              })
+
+          pot_match = re.search(pattern["pot_and_rake"], summary)
+          winner_match = re.search(pattern["winner_no_showdown"], summary)
+          showdown = False  
+
+          if not winner_match:
+              winner_match = re.search(pattern["winner_showdown"], summary)
+              showdown = True if winner_match else False
+
+          winner = None
+          if winner_match:
+              winner = {
+                  "name": winner_match.group("name"),
+                  "seat": int(winner_match.group("seat")),
+                  "cards": winner_match.group("cards").split(" ") if "cards" in winner_match.groupdict() and winner_match.group("cards") else [],
+                  "amount": float(winner_match.group("amount")),
+                  "currency": winner_match.group("currency"),
+              }
+
+          looser = None
+          looser_match = re.search(pattern["looser_shown"], summary)
+          if not looser_match:
+              looser_match = re.search(pattern["looser_discarded"], summary)
+
+          if looser_match:
+              looser = {
+                  "name": looser_match.group("name"),
+                  "seat": int(looser_match.group("seat")),
+                  "cards": looser_match.group("cards").split(" "),  
+              }
+
+          community_cards_match = re.search(pattern["community_cards"], summary)
+          community_cards = community_cards_match.group("cards").split(" ") if community_cards_match else []
+
+          hero_fold_match = re.search(pattern["hero_fold"], summary)
+          last_phase_hero_folded = None
+          if hero_fold_match:
+              if hero_fold_match.group("phase_preflop"):  
+                  last_phase_hero_folded = "PRE_FLOP"  
+              elif hero_fold_match.group("phase_postflop"):
+                  last_phase_hero_folded = hero_fold_match.group("phase_postflop")  
+
+          return {
+              "player_actions": players_actions,
+              "pot": float(pot_match.group("pot")) if pot_match else 0,
+              "rake": float(pot_match.group("rake")) if pot_match else 0,
+              "currency": pot_match.group("currency") if pot_match else None,
+              "winner": winner,
+              "looser": looser,
+              "community_cards": community_cards,
+              "showdown": showdown,
+              "last_phase_hero_folded": last_phase_hero_folded,
+              "hero_seat": hero_seat
+          }
   
   def extract_showdown(self, hand: str, game_type: str):
     result = {}
     patterns = {
         "zoom": {
             "winner": r"(?P<player>\S+): shows \[(?P<hand>.*?)\] \((?P<description>.*?)\)",
-            "loser": r"(?P<player>\S+): mucks hand",
+            "looser": r"(?P<player>\S+): mucks hand",
             "collect": r"(?P<player>\S+) collected (?P<amount>[\d\.]+) (?P<currency>[^\d\s]+) from pot"
         },
         "regular": {
             "winner": r"",
-            "loser": r"",
+            "looser": r"",
             "collect": r"",
         },
         "tournament": {
             "winner": r"",
-            "loser": r"",
+            "looser": r"",
             "collect": r"",
         },
         "sng": {
             "winner": r"",
-            "loser": r"",
+            "looser": r"",
             "collect": r"",
         },
     }
@@ -280,12 +370,12 @@ class PokerStarsEnglishParser:
             "hand_description": winner.group("description")
         })
 
-    loser_match = re.finditer(pattern["loser"], showdown_text)
-    for loser in loser_match:
-        if "loser" not in result:
-            result["loser"] = []
-        result["loser"].append(loser.group("player"))
-        result["loser_action"] = "muck"
+    looser_match = re.finditer(pattern["looser"], showdown_text)
+    for looser in looser_match:
+        if "looser" not in result:
+            result["looser"] = []
+        result["looser"].append(looser.group("player"))
+        result["looser_action"] = "muck"
 
     collect_match = re.finditer(pattern["collect"], showdown_text)
     for collect in collect_match:
