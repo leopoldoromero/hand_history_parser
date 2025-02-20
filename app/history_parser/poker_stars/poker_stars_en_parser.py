@@ -1,6 +1,7 @@
 import re
 from app.stats_generator.game_state_handler import GameStateHandler
 from collections import defaultdict
+import uuid
 
 class PokerStarsEnglishParser:
   def __init__(self, transcription: str):
@@ -23,6 +24,7 @@ class PokerStarsEnglishParser:
         finish_before_showdown = self.extract_finish_before_showdown(hand, game_type)
         table_name, table_type, button_seat = self.extract_table_and_button_info(hand, game_type)
         processed_hand = {
+           "id": str(uuid.uuid4()),
           "general_info": header_info,
           "table_name": table_name,
           "table_type": table_type,
@@ -104,7 +106,7 @@ class PokerStarsEnglishParser:
           blinds = (float(blinds_match.group("small_blind")), float(blinds_match.group("big_blind")))
 
           return {
-            "hand_id": hand_id,
+            "room_hand_id": hand_id,
             "datetime": datetime,
             "game_type": game_type,
             "currency": currency,
@@ -288,7 +290,7 @@ class PokerStarsEnglishParser:
                   "seat": int(winner_match.group("seat")),
                   "cards": winner_match.group("cards").split(" ") if "cards" in winner_match.groupdict() and winner_match.group("cards") else [],
                   "amount": float(winner_match.group("amount")),
-                  "currency": winner_match.group("currency"),
+                  # "currency": winner_match.group("currency"),
               }
 
           looser = None
@@ -318,7 +320,7 @@ class PokerStarsEnglishParser:
               "player_actions": players_actions,
               "pot": float(pot_match.group("pot")) if pot_match else 0,
               "rake": float(pot_match.group("rake")) if pot_match else 0,
-              "currency": pot_match.group("currency") if pot_match else None,
+              # "currency": pot_match.group("currency") if pot_match else None,
               "winner": winner,
               "looser": looser,
               "community_cards": community_cards,

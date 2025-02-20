@@ -19,6 +19,20 @@ class HandVsRangeEquityCalculator:
     def convert_hand(self, hand):
         """Converts a list of human-readable cards (e.g., ["As", "Kc"]) to Treys format."""
         return [self.convert_card(card) for card in hand]
+    
+    def expand_range(self, opponent_range):
+        """Expands shorthand range notation like 'JJ+' to explicit hand representations."""
+        expanded_range = []
+        pocket_pairs = "22 33 44 55 66 77 88 99 TT JJ QQ KK AA".split()
+        
+        for hand in opponent_range:
+            if '+' in hand and len(hand) == 3 and hand[0] == hand[1]:  # Detect pocket pair shorthand like "JJ+"
+                start_index = pocket_pairs.index(hand[:2])
+                expanded_range.extend(pocket_pairs[start_index:])
+            else:
+                expanded_range.append(hand)  # Keep suited/offsuit hands as they are
+        
+        return expanded_range
 
     def simulate_matchup(self, hand1, hand2, board, num_simulations, deck):
         """
@@ -78,12 +92,13 @@ class HandVsRangeEquityCalculator:
         equity of tie (e.g [28.02, 62.11, 9.87]) 
         """
 
+        expanded_range = self.expand_range(opponent_range)
         # Generate deck without known cards
         deck = [Card.new(rank + suit) for rank in "23456789TJQKA" for suit in "shdc"]
         deck = [card for card in deck if card not in hand1 + board]
         
         # Generate all possible opponent hands
-        opponent_hands = self.range_generator.generate(opponent_range, excluded_cards=hand1 + board[:])
+        opponent_hands = self.range_generator.generate(expanded_range, excluded_cards=hand1 + board[:])
         opponent_hands = [self.convert_hand(hand) for hand in opponent_hands]
 
         total_wins1, total_wins2, total_ties = 0, 0, 0

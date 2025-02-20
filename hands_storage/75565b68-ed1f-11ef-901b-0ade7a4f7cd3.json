@@ -1,0 +1,241 @@
+[
+    {
+        "id": "6b6062b5-472d-4274-a538-bfe17e37fbdf",
+        "user_id": "75565b68-ed1f-11ef-901b-0ade7a4f7cd3",
+        "general_info": {
+            "room_hand_id": "254718322088",
+            "datetime": "05-02-2025 14:48:32",
+            "game_type": "zoom",
+            "currency": "\u20ac",
+            "small_blind": 0.02,
+            "big_blind": 0.05,
+            "game": "Hold'em",
+            "room": "STARS"
+        },
+        "table_name": "Asterope",
+        "table_type": "6-max",
+        "button_seat": 1,
+        "players": [
+            {
+                "seat": 1,
+                "name": "Ermufa",
+                "stack": 4.59
+            },
+            {
+                "seat": 2,
+                "name": "alfonsoterrible",
+                "stack": 4.95
+            },
+            {
+                "seat": 3,
+                "name": "otot1302",
+                "stack": 4.9
+            },
+            {
+                "seat": 4,
+                "name": "sonieta1991",
+                "stack": 4.91
+            },
+            {
+                "seat": 5,
+                "name": "Nicoromero87",
+                "stack": 6.0
+            }
+        ],
+        "hero_cards": [
+            "8c",
+            "9c"
+        ],
+        "hero_name": "Nicoromero87",
+        "hero_seat": 5,
+        "actions": [
+            {
+                "phase": "PRE-FLOP",
+                "player": "alfonsoterrible",
+                "action": "small_blind",
+                "amount": 0.02,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "otot1302",
+                "action": "big_blind",
+                "amount": 0.05,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "sonieta1991",
+                "action": "fold",
+                "amount": null,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "Nicoromero87",
+                "action": "fold",
+                "amount": null,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "Ermufa",
+                "action": "fold",
+                "amount": null,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "alfonsoterrible",
+                "action": "fold",
+                "amount": null,
+                "cards": []
+            }
+        ],
+        "summary": {
+            "pot": 0.04,
+            "rake": 0.0,
+            "winner": {
+                "seat": 3,
+                "name": "otot1302",
+                "cards": [],
+                "amount": 0.04
+            },
+            "looser": null,
+            "community_cards": [],
+            "showdown": false,
+            "pot_type": "UNOPENED",
+            "last_phase_hero_folded": "PRE_FLOP",
+            "hero_seat": 5
+        }
+    },
+    {
+        "id": "5994750a-bade-4239-9af8-b5f914fe241d",
+        "user_id": "75565b68-ed1f-11ef-901b-0ade7a4f7cd3",
+        "general_info": {
+            "room_hand_id": "254718320478",
+            "datetime": "05-02-2025 14:48:23",
+            "game_type": "zoom",
+            "currency": "\u20ac",
+            "small_blind": 0.02,
+            "big_blind": 0.05,
+            "game": "Hold'em",
+            "room": "STARS"
+        },
+        "table_name": "Asterope",
+        "table_type": "6-max",
+        "button_seat": 1,
+        "players": [
+            {
+                "seat": 1,
+                "name": "sonieta1991",
+                "stack": 6.34
+            },
+            {
+                "seat": 2,
+                "name": "alfonsoterrible",
+                "stack": 4.89
+            },
+            {
+                "seat": 3,
+                "name": "muelliman1",
+                "stack": 7.45
+            },
+            {
+                "seat": 4,
+                "name": "Nicoromero87",
+                "stack": 6.0
+            },
+            {
+                "seat": 5,
+                "name": "Tamaragn",
+                "stack": 3.5
+            },
+            {
+                "seat": 6,
+                "name": "Fiel.8504200",
+                "stack": 4.98
+            }
+        ],
+        "hero_cards": [
+            "Kh",
+            "9d"
+        ],
+        "hero_name": "Nicoromero87",
+        "hero_seat": 4,
+        "actions": [
+            {
+                "phase": "PRE-FLOP",
+                "player": "alfonsoterrible",
+                "action": "small_blind",
+                "amount": 0.02,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "muelliman1",
+                "action": "big_blind",
+                "amount": 0.05,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "Nicoromero87",
+                "action": "fold",
+                "amount": null,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "Tamaragn",
+                "action": "fold",
+                "amount": null,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "Fiel.8504200",
+                "action": "raise",
+                "amount": 0.11,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "sonieta1991",
+                "action": "fold",
+                "amount": null,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "alfonsoterrible",
+                "action": "fold",
+                "amount": null,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "muelliman1",
+                "action": "fold",
+                "amount": null,
+                "cards": []
+            }
+        ],
+        "summary": {
+            "pot": 0.12,
+            "rake": 0.0,
+            "winner": {
+                "seat": 6,
+                "name": "Fiel.8504200",
+                "cards": [],
+                "amount": 0.12
+            },
+            "looser": null,
+            "community_cards": [],
+            "showdown": false,
+            "pot_type": "OPEN_RAISED",
+            "last_phase_hero_folded": "PRE_FLOP",
+            "hero_seat": 4
+        }
+    }
+]

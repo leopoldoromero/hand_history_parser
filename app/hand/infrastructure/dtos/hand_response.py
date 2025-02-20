@@ -20,7 +20,7 @@ class PotType(str, Enum):
     FOUR_BET = "4BET"
 
 class GeneralInfo(BaseModel):
-    hand_id: str
+    room_hand_id: str
     datetime: str
     game_type: str
     currency: str
@@ -51,17 +51,17 @@ class SummaryPlayerResult(BaseModel):
     name: str
     cards: list
     amount: float
-    currency: str
+
 class Summary(BaseModel):
-    player_actions: List[PlayerAction]
     pot: float
     rake: float
     winner: SummaryPlayerResult
-    looser: SummaryPlayerResult
+    looser: Optional[SummaryPlayerResult]
     community_cards: List[str]
     showdown: bool
     last_phase_hero_folded: LastPhaseHeroFolded
     pot_type: PotType
+    hero_seat: int
 
 class Showdown(BaseModel):
     winner: str
@@ -72,19 +72,22 @@ class FinishBeforeShowdown(BaseModel):
     player: str 
     action: str 
     amount: float
+
 class HandResponseDto(BaseModel):
     id: UUID
+    user_id: str
     general_info: GeneralInfo
     players: List[Player]
     hero_cards: List[str]
     hero_name: str
+    hero_seat: int
     actions: List[Action]
-    summary: Summary
+    summary: Summary 
+    table_name: str 
+    table_type: str
+    button_seat: int
     # showdown: Showdown
     # finish_before_showdown: List[FinishBeforeShowdown]  
-
-class HandHistoryResponse(BaseModel):
-    hands: List[HandResponseDto]
 
 class GetHandResponseDto(BaseModel):
     hand: HandResponseDto 
