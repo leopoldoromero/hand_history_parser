@@ -8,9 +8,9 @@ from app.hand.domain.hand_repository import HandRepository
 
 class HandJsonRepository(HandRepository):
     """JSON-based repository for hands (persistent storage)."""
-    
+
     STORAGE_DIR = Path("hands_storage")
-    _locks = {}   # Ensures thread safety
+    _locks = {}  # Ensures thread safety
 
     def __init__(self):
         """Load existing hands from file on startup."""
@@ -33,22 +33,27 @@ class HandJsonRepository(HandRepository):
             with open(file_path, "r", encoding="utf-8") as f:
                 try:
                     hands_data = json.load(f)
-                    return [Hand.from_primitives({
-                            "id": hand["id"],
-                            "user_id": "75565b68-ed1f-11ef-901b-0ade7a4f7cd3",
-                            "general_info":hand["general_info"], 
-                            "table_name":hand["table_name"],
-                            "table_type":hand["table_type"],
-                            "button_seat":hand["button_seat"],
-                            "players":hand["players"], 
-                            "hero_cards":hand["hero_cards"],
-                            "hero_name":hand["hero_name"],
-                            "hero_seat":hand["hero_seat"],
-                            "actions":hand["actions"], 
-                            "summary": hand["summary"]
-                     }) for hand in hands_data]
+                    return [
+                        Hand.from_primitives(
+                            {
+                                "id": hand["id"],
+                                "user_id": "75565b68-ed1f-11ef-901b-0ade7a4f7cd3",
+                                "general_info": hand["general_info"],
+                                "table_name": hand["table_name"],
+                                "table_type": hand["table_type"],
+                                "button_seat": hand["button_seat"],
+                                "players": hand["players"],
+                                "hero_cards": hand["hero_cards"],
+                                "hero_name": hand["hero_name"],
+                                "hero_seat": hand["hero_seat"],
+                                "actions": hand["actions"],
+                                "summary": hand["summary"],
+                            }
+                        )
+                        for hand in hands_data
+                    ]
                 except json.JSONDecodeError:
-                    print(f"DECODE ERROR")
+                    print("DECODE ERROR")
                     return []
         return []
 
@@ -58,20 +63,25 @@ class HandJsonRepository(HandRepository):
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump([hand.to_primitives() for hand in hands], f, indent=4)
 
-
     async def create(self, hand: Hand) -> None:
         """Save a hand to the JSON file."""
         async with self._get_lock(hand.user_id):
             hands = self._load_hands(hand.user_id)  # Reload hands before making changes
-            if any(existing_hand.general_info.room_hand_id == hand.general_info.room_hand_id for existing_hand in hands):
-                return  
+            if any(
+                existing_hand.general_info.room_hand_id
+                == hand.general_info.room_hand_id
+                for existing_hand in hands
+            ):
+                return
             hands.append(hand)
             self._save_hands(hand.user_id, hands)
 
     async def get(self, hand_id: str, user_id: str) -> Optional[Hand]:
         """Retrieve a hand by ID from the JSON file."""
         async with self._get_lock(user_id):
-            hands = self._load_hands(user_id)  # Reload hands from the file to ensure up-to-date data
+            hands = self._load_hands(
+                user_id
+            )  # Reload hands from the file to ensure up-to-date data
             for hand in hands:
                 if hand.id == hand_id:
                     return hand
@@ -81,12 +91,14 @@ class HandJsonRepository(HandRepository):
         """Retrieve all hands for a specific user."""
         async with self._get_lock(user_id):
             return self._load_hands(user_id)
-        
-    async def get_with_neighbors(self, hand_id: str, user_id: str) -> Tuple[Optional[Hand], Optional[str], Optional[str]]:
+
+    async def get_with_neighbors(
+        self, hand_id: str, user_id: str
+    ) -> Tuple[Optional[Hand], Optional[str], Optional[str]]:
         """Retrieve a hand and determine its previous and next hand for the same user."""
         async with self._get_lock(user_id):
             hands = self._load_hands(user_id)
-            
+
             prev_hand = None
             next_hand = None
 
@@ -94,6 +106,13 @@ class HandJsonRepository(HandRepository):
                 if hand.id == hand_id:
                     prev_hand = hands[index - 1] if index > 0 else None
                     next_hand = hands[index + 1] if index < len(hands) - 1 else None
-                    return hand, prev_hand.id if prev_hand else None, next_hand.id if next_hand else None
+                    return (
+                        hand,
+                        prev_hand.id if prev_hand else None,
+                        next_hand.id if next_hand else None,
+                    )
 
         return None, None, None
+
+
+hand_repository = HandJsonRepository()

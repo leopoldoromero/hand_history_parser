@@ -10,6 +10,7 @@ class LastPhaseHeroFolded(str, Enum):
     TURN = "TURN"
     RIVER = "RIVER"
 
+
 class PotType(str, Enum):
     UNOPENED = "UNOPENED"
     LIMPED = "LIMPED"
@@ -18,6 +19,7 @@ class PotType(str, Enum):
     THREE_BET = "3BET"
     SQUEEZE = "SQUEEZE"
     FOUR_BET = "4BET"
+
 
 class GeneralInfo(BaseModel):
     room_hand_id: str
@@ -28,17 +30,20 @@ class GeneralInfo(BaseModel):
     big_blind: float
     game: str
 
+
 class Player(BaseModel):
     seat: int
     name: str
     stack: float
 
+
 class Action(BaseModel):
     phase: str
     player: str
     action: str
-    amount: Optional[float] = None  
+    amount: Optional[float] = None
     cards: List[str] = []
+
 
 class PlayerAction(BaseModel):
     seat: int
@@ -46,11 +51,13 @@ class PlayerAction(BaseModel):
     details: str
     amount: float
 
+
 class SummaryPlayerResult(BaseModel):
     seat: int
     name: str
     cards: list
-    amount: float
+    amount: Optional[float]
+
 
 class Summary(BaseModel):
     pot: float
@@ -59,19 +66,22 @@ class Summary(BaseModel):
     looser: Optional[SummaryPlayerResult]
     community_cards: List[str]
     showdown: bool
-    last_phase_hero_folded: LastPhaseHeroFolded
+    last_phase_hero_folded: Optional[LastPhaseHeroFolded]
     pot_type: PotType
     hero_seat: int
+
 
 class Showdown(BaseModel):
     winner: str
     winner_hand: List[str]
     winner_hand_description: str
 
+
 class FinishBeforeShowdown(BaseModel):
-    player: str 
-    action: str 
+    player: str
+    action: str
     amount: float
+
 
 class HandResponseDto(BaseModel):
     id: UUID
@@ -82,14 +92,15 @@ class HandResponseDto(BaseModel):
     hero_name: str
     hero_seat: int
     actions: List[Action]
-    summary: Summary 
-    table_name: str 
+    summary: Summary
+    table_name: str
     table_type: str
     button_seat: int
     # showdown: Showdown
-    # finish_before_showdown: List[FinishBeforeShowdown]  
+    # finish_before_showdown: List[FinishBeforeShowdown]
+
 
 class GetHandResponseDto(BaseModel):
-    hand: HandResponseDto 
+    hand: HandResponseDto
     prev_hand_id: Optional[str]
     next_hand_id: Optional[str]

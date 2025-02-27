@@ -7,8 +7,8 @@ from app.stats_generator.action_handlers.squeeze_handler import SqueezeHandler
 from app.stats_generator.action_handlers.four_bet_handler import FourBetHandler
 
 
-class ActionHandlerFactory():
-  handlers = {
+class ActionHandlerFactory:
+    _handlers = {
         "UNOPENED": UnopenedHandler,
         "LIMPED": LimpHandler,
         "OPEN_RAISED": ORHandler,
@@ -17,6 +17,8 @@ class ActionHandlerFactory():
         "SQUEEZE": SqueezeHandler,
         "4BET": FourBetHandler,
     }
-  @staticmethod
-  def get_handler(state):
-    return ActionHandlerFactory.handlers.get(state, None)()
+
+    @staticmethod
+    def get_handler(state):
+        handler = ActionHandlerFactory._handlers.get(state)
+        return handler() if handler else None

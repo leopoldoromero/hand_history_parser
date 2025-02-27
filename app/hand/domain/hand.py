@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List, Optional
 
 
@@ -31,7 +30,14 @@ class Player:
 
 
 class Action:
-    def __init__(self, phase: str, player: str, action: str, amount: float, cards: List[str]):
+    def __init__(
+        self,
+        phase: str,
+        player: str,
+        action: str,
+        amount: Optional[float],
+        cards: List[str],
+    ):
         self.phase = phase
         self.player = player
         self.action = action
@@ -44,7 +50,7 @@ class Action:
             phase=data["phase"],
             player=data["player"],
             action=data["action"],
-            amount=data["amount"],
+            amount=data.get("amount"),
             cards=data["cards"],
         )
 
@@ -104,18 +110,19 @@ class GeneralInfo:
             "room": self.room,
         }
 
-class SummaryPlayerResult():
+
+class SummaryPlayerResult:
     def __init__(
-            self,
-            seat: int,
-            name: str,
-            cards: list,
-            amount: Optional[float],
+        self,
+        seat: int,
+        name: str,
+        cards: list,
+        amount: Optional[float],
     ):
         self.seat = seat
-        self.name = name 
-        self.cards = cards 
-        self.amount = amount 
+        self.name = name
+        self.cards = cards
+        self.amount = amount
 
     @staticmethod
     def from_primitives(data):
@@ -123,7 +130,7 @@ class SummaryPlayerResult():
             seat=data["seat"],
             name=data["name"],
             cards=data["cards"],
-            amount=data["amount"],
+            amount=data.get("amount"),
         )
 
     def to_primitives(self):
@@ -133,7 +140,7 @@ class SummaryPlayerResult():
             "cards": self.cards,
             "amount": self.amount,
         }
-   
+
 
 class Summary:
     def __init__(
@@ -146,7 +153,7 @@ class Summary:
         showdown: bool,
         pot_type: str,
         last_phase_hero_folded: str,
-        hero_seat: int
+        hero_seat: int,
     ):
         self.pot = pot
         self.rake = rake
@@ -164,25 +171,31 @@ class Summary:
             pot=data["pot"],
             rake=data["rake"],
             winner=SummaryPlayerResult.from_primitives(data["winner"]),
-            looser=SummaryPlayerResult.from_primitives(data["looser"]) if data["looser"] else None,
+            looser=SummaryPlayerResult.from_primitives(data["looser"])
+            if data["looser"]
+            else None,
             community_cards=data["community_cards"],
             showdown=data["showdown"],
             pot_type=data["pot_type"],
             last_phase_hero_folded=data["last_phase_hero_folded"],
-            hero_seat=data["hero_seat"]
+            hero_seat=data["hero_seat"],
         )
 
     def to_primitives(self):
         return {
             "pot": self.pot,
             "rake": self.rake,
-            "winner": self.winner.to_primitives() if self.winner else None,  # Include winner field
-            "looser": self.looser.to_primitives() if self.looser else None,  # Include looser field
+            "winner": self.winner.to_primitives()
+            if self.winner
+            else None,  # Include winner field
+            "looser": self.looser.to_primitives()
+            if self.looser
+            else None,  # Include looser field
             "community_cards": self.community_cards,
             "showdown": self.showdown,
             "pot_type": self.pot_type,
             "last_phase_hero_folded": self.last_phase_hero_folded,
-            "hero_seat": self.hero_seat
+            "hero_seat": self.hero_seat,
         }
 
 
@@ -240,7 +253,6 @@ class Hand:
             raise
 
     def to_primitives(self):
-        
         return {
             "id": self.id,
             "user_id": self.user_id,
