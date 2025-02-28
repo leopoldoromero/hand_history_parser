@@ -1,0 +1,38 @@
+name: Deploy Images to GHCR
+
+permissions:
+  packages: write
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  docker-build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v3
+
+      - name: 'Login to GitHub Container Registry'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 'Build and Push Docker Image'
+        run: |
+          docker build . \
+            --tag ghcr.io/${{ github.repository_owner }}/hand_history_parser:latest
+          docker push ghcr.io/${{ github.repository_owner }}/hand_history_parser:latest
+
+      - name: 'Deploy to instance'
+        run: |
+          eval $(ssh-agent -s)
+          echo "${{ secrets.DEPLOY_KEY }}" | ssh-add -
+          ssh -o StrictHostKeyChecking=no -t ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "bash ${{ secrets.DEPLOY_FOLDER }}/${{ secrets.DEPLOY_SCRIPT_SH }}"
+      

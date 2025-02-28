@@ -109,7 +109,7 @@ class PokerStarsEnglishParser:
     def extract_header_info(self, hand: str, game_type: str):
         patterns = {
             "zoom": r"PokerStars Zoom Hand #(?P<hand_id>\d+):.*?\((?P<blinds>.+?)\) - (?P<datetime>\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) CET",
-            "regular": r"",
+            "regular": r"PokerStars Hand #(?P<hand_id>\d+):.*?\((?P<blinds>.+?)\) - (?P<datetime>\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) CET",
             "tournament": r"",
             "sng": r"",
         }
@@ -145,7 +145,7 @@ class PokerStarsEnglishParser:
         players = []
         patterns = {
             "zoom": r"Seat (?P<seat>\d+): (?P<name>\S+) \([^\d]*(?P<stack>[\d]+\.\d+)\s*in chips\)",
-            "regular": r"",
+            "regular": r"Seat (?P<seat>\d+): (?P<name>\S+) \([^\d]*(?P<stack>[\d]+\.\d+)\s*in chips\)",
             "tournament": r"",
             "sng": r"",
         }
@@ -165,7 +165,7 @@ class PokerStarsEnglishParser:
     def extract_hero_info(self, hand: str, game_type: str):
         patterns = {
             "zoom": r"Dealt to (?P<hero>\S+) \[(.*?)\]",
-            "regular": r"",
+            "regular": r"Dealt to (?P<hero>\S+) \[(.*?)\]",
             "tournament": r"",
             "sng": r"",
         }
@@ -182,7 +182,7 @@ class PokerStarsEnglishParser:
         result = []
         patterns = {
             "zoom": r"(?P<player>\S+): posts (?P<type>small|big) blind (?P<currency>[^\d\s]+)(?P<amount>\d+\.\d+)",
-            "regular": r"",
+            "regular": r"(?P<player>\S+): posts (?P<type>small|big) blind (?P<currency>[^\d\s]+)(?P<amount>\d+\.\d+)",
             "tournament": r"",
             "sng": r"",
         }
@@ -210,7 +210,7 @@ class PokerStarsEnglishParser:
         action_phases = ["HOLE CARDS", "FLOP", "TURN", "RIVER"]
         patterns = {
             "zoom": r"(?P<player>\S+): (?P<action>raises|calls|folds|checks|bets)(?: (?P<currency>[^\d\s]+)(?P<amount1>[\d\.]+)(?: to (?P=currency)(?P<amount2>[\d\.]+))?)?",
-            "regular": r"",
+            "regular": r"(?P<player>\S+): (?P<action>raises|calls|folds|checks|bets)(?: (?P<currency>[^\d\s]+)(?P<amount1>[\d\.]+)(?: to (?P=currency)(?P<amount2>[\d\.]+))?)?",
             "tournament": r"",
             "sng": r"",
         }
@@ -267,7 +267,17 @@ class PokerStarsEnglishParser:
                 "looser_discarded": r"Seat (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? mucked \[(?P<cards>[^\]]+)\]",
                 "community_cards": r"Board \[(?P<cards>[^\]]+)\]",
                 "hero_fold": rf"Seat (?P<seat>\d+): {hero}(?: \([^)]+\))? folded (?:before (?P<phase_preflop>Flop)|on the (?P<phase_postflop>\w+))",
-            }
+            },
+            "regular": {
+                "player": r"Seat (?P<seat>\d+): (?P<name>\S+) (.*?\((?P<currency>[^\d\s]+)(?P<amount>[\d\.]+) in chips\))?(?P<details>.*)",
+                "pot_and_rake": r"Total pot (?P<currency>[^\d\s]+)(?P<pot>[\d\.]+) \| Rake (?P=currency)(?P<rake>[\d\.]+)",
+                "winner_no_showdown": r"Seat (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? collected \((?P<currency>[^\d\s]+)(?P<amount>[\d\.]+)\)",
+                "winner_showdown": r"Seat (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? showed \[(?P<cards>[^\]]+)\] and won \((?P<currency>[^\d\s]+)(?P<amount>[\d\.]+)\)",
+                "looser_shown": r"Seat (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? muestra \[(?P<cards>[^\]]+)\] y perdió .*",
+                "looser_discarded": r"Seat (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? mucked \[(?P<cards>[^\]]+)\]",
+                "community_cards": r"Board \[(?P<cards>[^\]]+)\]",
+                "hero_fold": rf"Seat (?P<seat>\d+): {hero}(?: \([^)]+\))? folded (?:before (?P<phase_preflop>Flop)|on the (?P<phase_postflop>\w+))",
+            },
         }
 
         pattern = patterns[game_type]
@@ -359,9 +369,9 @@ class PokerStarsEnglishParser:
                 "collect": r"(?P<player>\S+) collected (?P<amount>[\d\.]+) (?P<currency>[^\d\s]+) from pot",
             },
             "regular": {
-                "winner": r"",
-                "looser": r"",
-                "collect": r"",
+                "winner": r"(?P<player>\S+): shows \[(?P<hand>.*?)\] \((?P<description>.*?)\)",
+                "looser": r"(?P<player>\S+): mucks hand",
+                "collect": r"(?P<player>\S+) collected (?P<amount>[\d\.]+) (?P<currency>[^\d\s]+) from pot",
             },
             "tournament": {
                 "winner": r"",
@@ -426,8 +436,8 @@ class PokerStarsEnglishParser:
                 "winner": r"(?P<player>\S+) collected (?P<currency>[^\d\s]+)(?P<amount>[\d\.]+) from pot",
             },
             "regular": {
-                "uncalled": r"",
-                "winner": r"",
+                "uncalled": r"Uncalled bet \((?P<currency>[^\d\s]+)(?P<amount>[\d\.]+)\) returned to (?P<player>\S+)",
+                "winner": r"(?P<player>\S+) collected (?P<currency>[^\d\s]+)(?P<amount>[\d\.]+) from pot",
             },
             "tournament": {
                 "uncalled": r"",

@@ -54,6 +54,7 @@ class PokerStarsSpanishParser:
     def extract_table_and_button_info(self, hand: str, game_type: str):
         patterns = {
             "zoom": r'"(?P<table_name>[\w-]+)" (?P<table_type>[\w-]+) El asiento n\.º (?P<button_seat>\d+) es el botón',
+            "regular": r'"(?P<table_name>[\w-]+)" (?P<table_type>[\w-]+) El asiento n\.º (?P<button_seat>\d+) es el botón',
         }
 
         pattern = patterns[game_type]
@@ -109,7 +110,7 @@ class PokerStarsSpanishParser:
     def extract_header_info(self, hand: str, game_type: str):
         patterns = {
             "zoom": r"Mano n.º (?P<hand_id>\d+) de Zoom de PokerStars:.*?((?P<blinds>.+?)) - (?P<datetime>\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}) CET",
-            "regular": r"",
+            "regular": r"Mano n.º (?P<hand_id>\d+) de PokerStars:.*?((?P<blinds>.+?)) - (?P<datetime>\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}) CET",
             "tournament": r"",
             "sng": r"",
         }
@@ -145,7 +146,7 @@ class PokerStarsSpanishParser:
         players = []
         patterns = {
             "zoom": r"Asiento (?P<seat>\d+): (?P<name>\S+) \((?P<stack>[\d\.]+).*?\)",
-            "regular": r"",
+            "regular": r"Asiento (?P<seat>\d+): (?P<name>\S+) \((?P<stack>[\d\.]+).*?\)",
             "tournament": r"",
             "sng": r"",
         }
@@ -165,7 +166,7 @@ class PokerStarsSpanishParser:
     def extract_hero_info(self, hand: str, game_type: str):
         patterns = {
             "zoom": r"Repartidas a (?P<hero>\S+) \[(.*?)\]",
-            "regular": r"",
+            "regular": r"Repartidas a (?P<hero>\S+) \[(.*?)\]",
             "tournament": r"",
             "sng": r"",
         }
@@ -183,7 +184,7 @@ class PokerStarsSpanishParser:
         result = []
         patterns = {
             "zoom": r"(?P<player>\S+): pone la ciega (?P<type>pequeña|grande) (?P<amount>[\d\.]+)",
-            "regular": r"",
+            "regular": r"(?P<player>\S+): pone la ciega (?P<type>pequeña|grande) (?P<amount>[\d\.]+)",
             "tournament": r"",
             "sng": r"",
         }
@@ -211,7 +212,7 @@ class PokerStarsSpanishParser:
         action_phases = ["CARTAS DE MANO", "FLOP", "TURN", "RIVER"]
         patterns = {
             "zoom": r"(?P<player>\S+): (?P<action>sube|iguala|se retira|pasa|apuesta)(?: (?P<amount1>[\d\.]+) (?P<currency>[^\d\s]+)(?: a (?P<amount2>[\d\.]+) (?P=currency))?)?",
-            "regular": r"",
+            "regular": r"(?P<player>\S+): (?P<action>sube|iguala|se retira|pasa|apuesta)(?: (?P<amount1>[\d\.]+) (?P<currency>[^\d\s]+)(?: a (?P<amount2>[\d\.]+) (?P=currency))?)?",
             "tournament": r"",
             "sng": r"",
         }
@@ -271,7 +272,17 @@ class PokerStarsSpanishParser:
                 "looser_discarded": r"Asiento (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? descartó sin mostrar \[(?P<cards>[^\]]+)\]",
                 "community_cards": r"Comunitarias \[(?P<cards>[^\]]+)\]",
                 "hero_fold": rf"Asiento (?P<seat>\d+): {hero}(?: \([^)]+\))? se retiró (?:antes del (?P<phase_preflop>Flop)|en el (?P<phase_postflop>\w+))",
-            }
+            },
+            "regular": {
+                "player": r"Asiento (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? (?P<details>.*)",
+                "pot_and_rake": r"Bote total (?P<pot>[\d\.]+) (?P<currency>[^\d\s]+) \| Comisión (?P<rake>[\d\.]+) (?P=currency)",
+                "winner_no_showdown": r"Asiento (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? recaudó \((?P<amount>[\d\.]+) (?P<currency>[^\d\s]+)\)",
+                "winner_showdown": r"Asiento (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? muestra \[(?P<cards>[^\]]+)\] y ganó \((?P<amount>[\d\.]+) (?P<currency>[^\d\s]+)\)",
+                "looser_shown": r"Asiento (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? muestra \[(?P<cards>[^\]]+)\] y perdió .*",
+                "looser_discarded": r"Asiento (?P<seat>\d+): (?P<name>[^\s\(\)]+)(?: \([^)]+\))? descartó sin mostrar \[(?P<cards>[^\]]+)\]",
+                "community_cards": r"Comunitarias \[(?P<cards>[^\]]+)\]",
+                "hero_fold": rf"Asiento (?P<seat>\d+): {hero}(?: \([^)]+\))? se retiró (?:antes del (?P<phase_preflop>Flop)|en el (?P<phase_postflop>\w+))",
+            },
         }
 
         pattern = patterns[game_type]
@@ -364,8 +375,9 @@ class PokerStarsSpanishParser:
                 "collect": r"(?P<player>\S+) se lleva 0.23 (?P<amount>[\d\.]+) (?P<currency>[^\d\s]+) del bote",
             },
             "regular": {
-                "winner": r"",
-                "looser": r"",
+                "winner": r"(?P<player>\S+): muestra \[(?P<hand>.*?)\] \((?P<description>.*?)\)",
+                "looser": r"(?P<player>\S+): descarta su mano sin mostrar",
+                "collect": r"(?P<player>\S+) se lleva 0.23 (?P<amount>[\d\.]+) (?P<currency>[^\d\s]+) del bote",
             },
             "tournament": {
                 "winner": r"",
@@ -428,8 +440,8 @@ class PokerStarsSpanishParser:
                 "winner": r"(\S+) se lleva ([\d\.]+) € del bote",
             },
             "regular": {
-                "uncalled": r"",
-                "winner": r"",
+                "uncalled": r"La apuesta no igualada \(([\d\.]+)\s*\S*\) ha sido devuelta a (\S+)",
+                "winner": r"(\S+) se lleva ([\d\.]+) € del bote",
             },
             "tournament": {
                 "uncalled": r"",
