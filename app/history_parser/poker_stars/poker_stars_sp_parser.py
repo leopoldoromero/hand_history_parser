@@ -153,13 +153,12 @@ class PokerStarsSpanishParser:
         pattern = patterns[game_type]
 
         for player_match in re.finditer(pattern, hand):
-            players.append(
-                {
-                    "seat": int(player_match.group("seat")),
-                    "name": player_match.group("name"),
-                    "stack": float(player_match.group("stack")),
-                }
-            )
+            player = {
+                "seat": int(player_match.group("seat")),
+                "name": player_match.group("name"),
+                "stack": float(player_match.group("stack")),
+            }
+            players.append(player)
 
         return players
 
@@ -249,15 +248,15 @@ class PokerStarsSpanishParser:
                         else None
                     )
 
-                    result.append(
-                        {
-                            "phase": "PRE-FLOP" if phase == "CARTAS DE MANO" else phase,
-                            "player": action_match.group("player"),
-                            "action": action_name,
-                            "amount": amount,
-                            "cards": board_cards[:],
-                        }
-                    )
+                    parsed_action = {
+                        "phase": "PRE-FLOP" if phase == "CARTAS DE MANO" else phase,
+                        "player": action_match.group("player"),
+                        "action": action_name,
+                        "amount": amount,
+                        "cards": board_cards[:],
+                    }
+                    print(f"ACTION: {parsed_action}")
+                    result.append(parsed_action)
 
         return result
 

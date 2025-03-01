@@ -44,7 +44,12 @@ class PokerStarsEnglishParser:
                 "showdown": showdown,
                 "finish_before_showdown": finish_before_showdown,
             }
+
             pot_type = self.define_pot_type(processed_hand)
+            print(f"BTN Info: {table_name, table_type, button_seat}")
+            print(f"Hero name: {table_name, table_type, button_seat}")
+            print(f"SUMMARY: {summary}")
+            print(f"POT TYPE: {pot_type}")
 
             processed_hand["summary"]["pot_type"] = pot_type
 
@@ -144,14 +149,20 @@ class PokerStarsEnglishParser:
     def extract_players(self, hand: str, game_type: str):
         players = []
         patterns = {
-            "zoom": r"Seat (?P<seat>\d+): (?P<name>\S+) \([^\d]*(?P<stack>[\d]+\.\d+)\s*in chips\)",
-            "regular": r"Seat (?P<seat>\d+): (?P<name>\S+) \([^\d]*(?P<stack>[\d]+\.\d+)\s*in chips\)",
+            "zoom": r"Seat (?P<seat>\d+): (?P<name>\S+) \([^\d]*(?P<stack>[\d]+(?:\.\d+)?)\s*in chips\)",
+            "regular": r"Seat (?P<seat>\d+): (?P<name>\S+) \([^\d]*(?P<stack>[\d]+(?:\.\d+)?)\s*in chips\)",
             "tournament": r"",
             "sng": r"",
         }
         pattern = patterns[game_type]
 
         for player_match in re.finditer(pattern, hand):
+            player = {
+                "seat": int(player_match.group("seat")),
+                "name": player_match.group("name"),
+                "stack": float(player_match.group("stack")),
+            }
+            print(f"PLAYER: {player}")
             players.append(
                 {
                     "seat": int(player_match.group("seat")),
@@ -223,8 +234,14 @@ class PokerStarsEnglishParser:
 
             if phase_match:
                 actions = phase_match.group(1).strip()
-                cards_match = re.search(rf"\*\*\* {phase} \*\*\* \[(.*?)\]", hand)
-                cards = cards_match.group(1).split() if cards_match else []
+                cards_match = re.search(
+                    rf"\*\*\* {phase} \*\*\* ((?:\[[^\]]+\]\s*)+)", hand
+                )
+                if cards_match:
+                    cards = re.findall(r"\[([^\]]+)\]", cards_match.group(1))
+                    cards = " ".join(cards).split()
+                else:
+                    cards = []
 
                 for action_match in re.finditer(pattern, actions):
                     action = action_match.group("action")
@@ -243,16 +260,15 @@ class PokerStarsEnglishParser:
                         if action_match.group("amount1")
                         else None
                     )
-
-                    result.append(
-                        {
-                            "phase": "PRE-FLOP" if phase == "HOLE CARDS" else phase,
-                            "player": action_match.group("player"),
-                            "action": action_name,
-                            "amount": amount,
-                            "cards": cards,
-                        }
-                    )
+                    parsed_action = {
+                        "phase": "PRE-FLOP" if phase == "HOLE CARDS" else phase,
+                        "player": action_match.group("player"),
+                        "action": action_name,
+                        "amount": amount,
+                        "cards": cards,
+                    }
+                    print(f"ACTION: {parsed_action}")
+                    result.append(parsed_action)
 
         return result
 
