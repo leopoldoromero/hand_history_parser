@@ -1,7 +1,7 @@
 [
     {
-        "id": "b28d0229-3e6f-4fed-b58d-ea893d251d2f",
-        "user_id": "75565b68-ed1f-11ef-901b-0ade7a4f7cd3",
+        "id": "55942a08-1c86-4e5f-ab32-1d384c6b42e9",
+        "user_id": "01a01v02-ed1f-11ef-901b-0ade7a4f7cd3",
         "general_info": {
             "room_hand_id": "254755246480",
             "datetime": "2025/02/07 21:47:56",
@@ -180,11 +180,11 @@
         }
     },
     {
-        "id": "b62eeea6-9cb3-4074-a694-43f31a8d7948",
-        "user_id": "75565b68-ed1f-11ef-901b-0ade7a4f7cd3",
+        "id": "55942a08-1c86-4e5f-ab32-1d384c6b42e9",
+        "user_id": "01a01v02-ed1f-11ef-901b-0ade7a4f7cd3",
         "general_info": {
-            "room_hand_id": "254755245331",
-            "datetime": "2025/02/07 21:47:53",
+            "room_hand_id": "254755246480",
+            "datetime": "2025/02/07 21:47:56",
             "game_type": "zoom",
             "currency": "\u20ac",
             "small_blind": 0.02,
@@ -198,234 +198,61 @@
         "players": [
             {
                 "seat": 1,
-                "name": "Perco89",
-                "stack": 6.74
+                "name": "Senefer",
+                "stack": 4.01
             },
             {
                 "seat": 2,
-                "name": "Rogelio2",
-                "stack": 2.45
+                "name": "Mat22bcn",
+                "stack": 9.48
             },
             {
                 "seat": 3,
-                "name": "AK49point3",
-                "stack": 5.07
+                "name": "MakesMeRich",
+                "stack": 5.0
             },
             {
                 "seat": 4,
-                "name": "nandopadel91",
-                "stack": 9.66
+                "name": "ScrappyDooLo",
+                "stack": 5.43
             },
             {
                 "seat": 5,
                 "name": "Nicoromero87",
-                "stack": 7.27
+                "stack": 6.16
             },
             {
                 "seat": 6,
-                "name": "Bustelopower",
-                "stack": 3.84
+                "name": "vianney54",
+                "stack": 6.79
             }
         ],
         "hero_cards": [
-            "Jc",
-            "4s"
+            "7c",
+            "Js"
         ],
         "hero_name": "Nicoromero87",
         "hero_seat": 5,
         "actions": [
             {
                 "phase": "PRE-FLOP",
-                "player": "Rogelio2",
+                "player": "Mat22bcn",
                 "action": "small_blind",
                 "amount": 0.02,
                 "cards": []
             },
             {
                 "phase": "PRE-FLOP",
-                "player": "AK49point3",
+                "player": "MakesMeRich",
                 "action": "big_blind",
                 "amount": 0.05,
                 "cards": []
             },
-            {
-                "phase": "PRE-FLOP",
-                "player": "nandopadel91",
-                "action": "fold",
-                "amount": null,
-                "cards": []
-            },
-            {
-                "phase": "PRE-FLOP",
-                "player": "Nicoromero87",
-                "action": "fold",
-                "amount": null,
-                "cards": []
-            },
-            {
-                "phase": "PRE-FLOP",
-                "player": "Bustelopower",
-                "action": "raise",
-                "amount": 0.15,
-                "cards": []
-            },
-            {
-                "phase": "PRE-FLOP",
-                "player": "Perco89",
-                "action": "fold",
-                "amount": null,
-                "cards": []
-            },
-            {
-                "phase": "PRE-FLOP",
-                "player": "Rogelio2",
-                "action": "fold",
-                "amount": null,
-                "cards": []
-            },
-            {
-                "phase": "PRE-FLOP",
-                "player": "AK49point3",
-                "action": "call",
-                "amount": 0.1,
-                "cards": []
-            },
-            {
-                "phase": "FLOP",
-                "player": "AK49point3",
-                "action": "check",
-                "amount": null,
-                "cards": [
-                    "Qc",
-                    "3d",
-                    "4h"
-                ]
-            },
-            {
-                "phase": "FLOP",
-                "player": "Bustelopower",
-                "action": "bet",
-                "amount": 0.1,
-                "cards": [
-                    "Qc",
-                    "3d",
-                    "4h"
-                ]
-            },
-            {
-                "phase": "FLOP",
-                "player": "AK49point3",
-                "action": "fold",
-                "amount": null,
-                "cards": [
-                    "Qc",
-                    "3d",
-                    "4h"
-                ]
-            }
-        ],
-        "summary": {
-            "pot": 0.32,
-            "rake": 0.02,
-            "winner": {
-                "seat": 6,
-                "name": "Bustelopower",
-                "cards": [],
-                "amount": 0.3
-            },
-            "looser": null,
-            "community_cards": [
-                "Qc",
-                "3d",
-                "4h"
-            ],
-            "showdown": false,
-            "pot_type": "OPEN_RAISED",
-            "last_phase_hero_folded": "PRE_FLOP",
-            "hero_seat": 5
-        }
-    },
-    {
-        "id": "581e7d04-fde4-469a-8109-8f18f1e8848e",
-        "user_id": "75565b68-ed1f-11ef-901b-0ade7a4f7cd3",
-        "general_info": {
-            "room_hand_id": "254755239972",
-            "datetime": "2025/02/07 21:47:35",
-            "game_type": "zoom",
-            "currency": "\u20ac",
-            "small_blind": 0.02,
-            "big_blind": 0.05,
-            "game": "Hold'em",
-            "room": "STARS"
-        },
-        "table_name": "Asterope",
-        "table_type": "6-max",
-        "button_seat": 1,
-        "players": [
-            {
-                "seat": 1,
-                "name": "vianney54",
-                "stack": 8.61
-            },
-            {
-                "seat": 2,
-                "name": "ScrappyDooLo",
-                "stack": 5.5
-            },
-            {
-                "seat": 3,
-                "name": "Neutrinoxxxx",
-                "stack": 5.0
-            },
-            {
-                "seat": 4,
-                "name": "Qdoa",
-                "stack": 8.92
-            },
-            {
-                "seat": 5,
-                "name": "Perco89",
-                "stack": 5.79
-            },
-            {
-                "seat": 6,
-                "name": "Nicoromero87",
-                "stack": 6.16
-            }
-        ],
-        "hero_cards": [
-            "3s",
-            "3d"
-        ],
-        "hero_name": "Nicoromero87",
-        "hero_seat": 6,
-        "actions": [
             {
                 "phase": "PRE-FLOP",
                 "player": "ScrappyDooLo",
-                "action": "small_blind",
-                "amount": 0.02,
-                "cards": []
-            },
-            {
-                "phase": "PRE-FLOP",
-                "player": "Neutrinoxxxx",
-                "action": "big_blind",
-                "amount": 0.05,
-                "cards": []
-            },
-            {
-                "phase": "PRE-FLOP",
-                "player": "Qdoa",
                 "action": "fold",
                 "amount": null,
-                "cards": []
-            },
-            {
-                "phase": "PRE-FLOP",
-                "player": "Perco89",
-                "action": "raise",
-                "amount": 0.14,
                 "cards": []
             },
             {
@@ -444,42 +271,100 @@
             },
             {
                 "phase": "PRE-FLOP",
-                "player": "ScrappyDooLo",
+                "player": "Senefer",
+                "action": "raise",
+                "amount": 0.15,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "Mat22bcn",
+                "action": "call",
+                "amount": 0.13,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "MakesMeRich",
                 "action": "fold",
                 "amount": null,
                 "cards": []
             },
             {
-                "phase": "PRE-FLOP",
-                "player": "Neutrinoxxxx",
+                "phase": "FLOP",
+                "player": "Mat22bcn",
+                "action": "check",
+                "amount": null,
+                "cards": [
+                    "Jd",
+                    "4s",
+                    "Kh"
+                ]
+            },
+            {
+                "phase": "FLOP",
+                "player": "Senefer",
+                "action": "check",
+                "amount": null,
+                "cards": [
+                    "Jd",
+                    "4s",
+                    "Kh"
+                ]
+            },
+            {
+                "phase": "TURN",
+                "player": "Mat22bcn",
+                "action": "bet",
+                "amount": 0.4,
+                "cards": [
+                    "Jd",
+                    "4s",
+                    "Kh",
+                    "Ks"
+                ]
+            },
+            {
+                "phase": "TURN",
+                "player": "Senefer",
                 "action": "fold",
                 "amount": null,
-                "cards": []
+                "cards": [
+                    "Jd",
+                    "4s",
+                    "Kh",
+                    "Ks"
+                ]
             }
         ],
         "summary": {
-            "pot": 0.12,
-            "rake": 0.0,
+            "pot": 0.35,
+            "rake": 0.02,
             "winner": {
-                "seat": 5,
-                "name": "Perco89",
+                "seat": 2,
+                "name": "Mat22bcn",
                 "cards": [],
-                "amount": 0.12
+                "amount": 0.33
             },
             "looser": null,
-            "community_cards": [],
+            "community_cards": [
+                "Jd",
+                "4s",
+                "Kh",
+                "Ks"
+            ],
             "showdown": false,
             "pot_type": "OPEN_RAISED",
             "last_phase_hero_folded": "PRE_FLOP",
-            "hero_seat": 6
+            "hero_seat": 5
         }
     },
     {
-        "id": "c59744d4-3d7b-4852-aa3a-5494d63028e2",
-        "user_id": "75565b68-ed1f-11ef-901b-0ade7a4f7cd3",
+        "id": "55942a08-1c86-4e5f-ab32-1d384c6b42e9",
+        "user_id": "01a01v02-ed1f-11ef-901b-0ade7a4f7cd3",
         "general_info": {
-            "room_hand_id": "254717173764",
-            "datetime": "05-02-2025 12:34:49",
+            "room_hand_id": "254755246480",
+            "datetime": "2025/02/07 21:47:56",
             "game_type": "zoom",
             "currency": "\u20ac",
             "small_blind": 0.02,
@@ -493,63 +378,61 @@
         "players": [
             {
                 "seat": 1,
-                "name": "Nicoromero87",
-                "stack": 5.92
+                "name": "Senefer",
+                "stack": 4.01
             },
             {
                 "seat": 2,
-                "name": "camamo26",
-                "stack": 6.22
+                "name": "Mat22bcn",
+                "stack": 9.48
             },
             {
                 "seat": 3,
-                "name": "GhostGambler1",
-                "stack": 5.76
+                "name": "MakesMeRich",
+                "stack": 5.0
             },
             {
                 "seat": 4,
-                "name": "Mauuu_bg",
-                "stack": 4.36
+                "name": "ScrappyDooLo",
+                "stack": 5.43
             },
             {
                 "seat": 5,
-                "name": "fraanespinosa",
-                "stack": 6.49
+                "name": "Nicoromero87",
+                "stack": 6.16
+            },
+            {
+                "seat": 6,
+                "name": "vianney54",
+                "stack": 6.79
             }
         ],
         "hero_cards": [
-            "Ts",
-            "3s"
+            "7c",
+            "Js"
         ],
         "hero_name": "Nicoromero87",
-        "hero_seat": 1,
+        "hero_seat": 5,
         "actions": [
             {
                 "phase": "PRE-FLOP",
-                "player": "camamo26",
+                "player": "Mat22bcn",
                 "action": "small_blind",
                 "amount": 0.02,
                 "cards": []
             },
             {
                 "phase": "PRE-FLOP",
-                "player": "GhostGambler1",
+                "player": "MakesMeRich",
                 "action": "big_blind",
                 "amount": 0.05,
                 "cards": []
             },
             {
                 "phase": "PRE-FLOP",
-                "player": "Mauuu_bg",
-                "action": "raise",
-                "amount": 0.12,
-                "cards": []
-            },
-            {
-                "phase": "PRE-FLOP",
-                "player": "fraanespinosa",
-                "action": "call",
-                "amount": 0.12,
+                "player": "ScrappyDooLo",
+                "action": "fold",
+                "amount": null,
                 "cards": []
             },
             {
@@ -561,123 +444,279 @@
             },
             {
                 "phase": "PRE-FLOP",
-                "player": "camamo26",
+                "player": "vianney54",
                 "action": "fold",
                 "amount": null,
                 "cards": []
             },
             {
                 "phase": "PRE-FLOP",
-                "player": "GhostGambler1",
+                "player": "Senefer",
+                "action": "raise",
+                "amount": 0.15,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "Mat22bcn",
+                "action": "call",
+                "amount": 0.13,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "MakesMeRich",
                 "action": "fold",
                 "amount": null,
                 "cards": []
             },
             {
                 "phase": "FLOP",
-                "player": "Mauuu_bg",
-                "action": "bet",
-                "amount": 0.1,
+                "player": "Mat22bcn",
+                "action": "check",
+                "amount": null,
                 "cards": [
-                    "6s",
-                    "Th",
-                    "Qd"
+                    "Jd",
+                    "4s",
+                    "Kh"
                 ]
             },
             {
                 "phase": "FLOP",
-                "player": "fraanespinosa",
-                "action": "call",
-                "amount": 0.1,
+                "player": "Senefer",
+                "action": "check",
+                "amount": null,
                 "cards": [
-                    "6s",
-                    "Th",
-                    "Qd"
+                    "Jd",
+                    "4s",
+                    "Kh"
                 ]
             },
             {
                 "phase": "TURN",
-                "player": "Mauuu_bg",
+                "player": "Mat22bcn",
                 "action": "bet",
-                "amount": 0.16,
+                "amount": 0.4,
                 "cards": [
-                    "6s",
-                    "Th",
-                    "Qd",
-                    "4h"
+                    "Jd",
+                    "4s",
+                    "Kh",
+                    "Ks"
                 ]
             },
             {
                 "phase": "TURN",
-                "player": "fraanespinosa",
-                "action": "call",
-                "amount": 0.16,
-                "cards": [
-                    "6s",
-                    "Th",
-                    "Qd",
-                    "4h"
-                ]
-            },
-            {
-                "phase": "RIVER",
-                "player": "Mauuu_bg",
-                "action": "check",
+                "player": "Senefer",
+                "action": "fold",
                 "amount": null,
                 "cards": [
-                    "6s",
-                    "Th",
-                    "Qd",
-                    "4h",
-                    "Ac"
-                ]
-            },
-            {
-                "phase": "RIVER",
-                "player": "fraanespinosa",
-                "action": "check",
-                "amount": null,
-                "cards": [
-                    "6s",
-                    "Th",
-                    "Qd",
-                    "4h",
-                    "Ac"
+                    "Jd",
+                    "4s",
+                    "Kh",
+                    "Ks"
                 ]
             }
         ],
         "summary": {
-            "pot": 0.83,
-            "rake": 0.04,
+            "pot": 0.35,
+            "rake": 0.02,
             "winner": {
-                "seat": 4,
-                "name": "Mauuu_bg",
-                "cards": [
-                    "Jd",
-                    "Qc"
-                ],
-                "amount": 0.79
+                "seat": 2,
+                "name": "Mat22bcn",
+                "cards": [],
+                "amount": 0.33
             },
-            "looser": {
-                "seat": 5,
-                "name": "fraanespinosa",
-                "cards": [
-                    "9h",
-                    "Ks"
-                ],
-                "amount": null
-            },
+            "looser": null,
             "community_cards": [
-                "6s",
-                "Th",
-                "Qd",
-                "4h",
-                "Ac"
+                "Jd",
+                "4s",
+                "Kh",
+                "Ks"
             ],
-            "showdown": true,
+            "showdown": false,
             "pot_type": "OPEN_RAISED",
             "last_phase_hero_folded": "PRE_FLOP",
-            "hero_seat": 1
+            "hero_seat": 5
+        }
+    },
+    {
+        "id": "55942a08-1c86-4e5f-ab32-1d384c6b42e9",
+        "user_id": "01a01v02-ed1f-11ef-901b-0ade7a4f7cd3",
+        "general_info": {
+            "room_hand_id": "254755246480",
+            "datetime": "2025/02/07 21:47:56",
+            "game_type": "zoom",
+            "currency": "\u20ac",
+            "small_blind": 0.02,
+            "big_blind": 0.05,
+            "game": "Hold'em",
+            "room": "STARS"
+        },
+        "table_name": "Asterope",
+        "table_type": "6-max",
+        "button_seat": 1,
+        "players": [
+            {
+                "seat": 1,
+                "name": "Senefer",
+                "stack": 4.01
+            },
+            {
+                "seat": 2,
+                "name": "Mat22bcn",
+                "stack": 9.48
+            },
+            {
+                "seat": 3,
+                "name": "MakesMeRich",
+                "stack": 5.0
+            },
+            {
+                "seat": 4,
+                "name": "ScrappyDooLo",
+                "stack": 5.43
+            },
+            {
+                "seat": 5,
+                "name": "Nicoromero87",
+                "stack": 6.16
+            },
+            {
+                "seat": 6,
+                "name": "vianney54",
+                "stack": 6.79
+            }
+        ],
+        "hero_cards": [
+            "7c",
+            "Js"
+        ],
+        "hero_name": "Nicoromero87",
+        "hero_seat": 5,
+        "actions": [
+            {
+                "phase": "PRE-FLOP",
+                "player": "Mat22bcn",
+                "action": "small_blind",
+                "amount": 0.02,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "MakesMeRich",
+                "action": "big_blind",
+                "amount": 0.05,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "ScrappyDooLo",
+                "action": "fold",
+                "amount": null,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "Nicoromero87",
+                "action": "fold",
+                "amount": null,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "vianney54",
+                "action": "fold",
+                "amount": null,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "Senefer",
+                "action": "raise",
+                "amount": 0.15,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "Mat22bcn",
+                "action": "call",
+                "amount": 0.13,
+                "cards": []
+            },
+            {
+                "phase": "PRE-FLOP",
+                "player": "MakesMeRich",
+                "action": "fold",
+                "amount": null,
+                "cards": []
+            },
+            {
+                "phase": "FLOP",
+                "player": "Mat22bcn",
+                "action": "check",
+                "amount": null,
+                "cards": [
+                    "Jd",
+                    "4s",
+                    "Kh"
+                ]
+            },
+            {
+                "phase": "FLOP",
+                "player": "Senefer",
+                "action": "check",
+                "amount": null,
+                "cards": [
+                    "Jd",
+                    "4s",
+                    "Kh"
+                ]
+            },
+            {
+                "phase": "TURN",
+                "player": "Mat22bcn",
+                "action": "bet",
+                "amount": 0.4,
+                "cards": [
+                    "Jd",
+                    "4s",
+                    "Kh",
+                    "Ks"
+                ]
+            },
+            {
+                "phase": "TURN",
+                "player": "Senefer",
+                "action": "fold",
+                "amount": null,
+                "cards": [
+                    "Jd",
+                    "4s",
+                    "Kh",
+                    "Ks"
+                ]
+            }
+        ],
+        "summary": {
+            "pot": 0.35,
+            "rake": 0.02,
+            "winner": {
+                "seat": 2,
+                "name": "Mat22bcn",
+                "cards": [],
+                "amount": 0.33
+            },
+            "looser": null,
+            "community_cards": [
+                "Jd",
+                "4s",
+                "Kh",
+                "Ks"
+            ],
+            "showdown": false,
+            "pot_type": "OPEN_RAISED",
+            "last_phase_hero_folded": "PRE_FLOP",
+            "hero_seat": 5
         }
     }
 ]

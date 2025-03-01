@@ -1,10 +1,8 @@
-from fastapi import APIRouter, HTTPException, Cookie, Request
+from fastapi import APIRouter, HTTPException, Cookie
 from app.hand.infrastructure.persistance.hand_json_repository import hand_repository
 from app.hand.infrastructure.dtos.hand_response import GetHandResponseDto
 
 router = APIRouter(prefix="/v1", tags=["hands"])
-
-DEFAULT_USER_ID = "75565b68-ed1f-11ef-901b-0ade7a4f7cd3"
 
 
 @router.get(
@@ -19,8 +17,7 @@ DEFAULT_USER_ID = "75565b68-ed1f-11ef-901b-0ade7a4f7cd3"
         500: {"description": "Internal server error."},
     },
 )
-async def run(request: Request, hand_id: str, user_id: str = Cookie(None)):
-    """Retrieve a specific hand by its ID and provide next/previous navigation."""
+async def run(hand_id: str, user_id: str = Cookie(None)):
     try:
         if not user_id:
             raise HTTPException(status_code=401, detail="Missing user_id in cookies")

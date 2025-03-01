@@ -66,14 +66,19 @@ class HandJsonRepository(HandRepository):
     async def create(self, hand: Hand) -> None:
         """Save a hand to the JSON file."""
         async with self._get_lock(hand.user_id):
-            hands = self._load_hands(hand.user_id)  # Reload hands before making changes
-            if any(
-                existing_hand.general_info.room_hand_id
-                == hand.general_info.room_hand_id
-                for existing_hand in hands
-            ):
-                return
+            hands = self._load_hands(hand.user_id)
+            for index, existing_hand in enumerate(hands):
+                if (
+                    existing_hand.general_info.room_hand_id
+                    == hand.general_info.room_hand_id
+                ):
+                    hands[index] = hand
+
             hands.append(hand)
+            if not hand.user_id:
+                raise RuntimeError(
+                    f"The hand: {hand.id} doesnt have a valid user_id received: {hand.user_id}"
+                )
             self._save_hands(hand.user_id, hands)
 
     async def get(self, hand_id: str, user_id: str) -> Optional[Hand]:
@@ -113,6 +118,14 @@ class HandJsonRepository(HandRepository):
                     )
 
         return None, None, None
+
+    async def delete_all(self, user_id: str) -> None:
+        """Delete all hands for a specific user by removing their JSON file."""
+        async with self._get_lock(user_id):
+            file_path = self._get_file_path(user_id)
+            if file_path.exists():
+                file_path.unlink()  # Delete the file
+                print(f"Deleted all hands for user {user_id}")
 
 
 hand_repository = HandJsonRepository()

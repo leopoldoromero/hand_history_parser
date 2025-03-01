@@ -4,8 +4,6 @@ from app.hand.infrastructure.dtos.generate_stats_response import GenerateStatsRe
 
 router = APIRouter(prefix="/v1", tags=["stats"])
 
-DEFAULT_USER_ID = "75565b68-ed1f-11ef-901b-0ade7a4f7cd3"
-
 
 @router.get(
     "/stats",
@@ -20,7 +18,6 @@ DEFAULT_USER_ID = "75565b68-ed1f-11ef-901b-0ade7a4f7cd3"
     },
 )
 async def run(user_id: str = Cookie(None)):
-    """Retrieve a specific hand by its ID and provide next/previous navigation."""
     try:
         if not user_id:
             raise HTTPException(status_code=401, detail="Missing user_id in cookies")
