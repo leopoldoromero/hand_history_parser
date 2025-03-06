@@ -85,7 +85,7 @@ class StatsGenerator:
     def calculate_3bet_percentage(self, total_3bets, opportunities):
         return (total_3bets / opportunities * 100) if opportunities else 0.0
 
-    def execute(self):
+    def execute(self, user_id: str):
         for hand in self.hands:
             self.process_hand(hand)
 
@@ -107,4 +107,4 @@ class StatsGenerator:
             stats.pfr = round(pfr, 2)
             stats.three_bet_percent = round(three_bet_percentage, 2)
 
-        return Stats(self.players_stats)
+        return Stats(user_id, self.players_stats)

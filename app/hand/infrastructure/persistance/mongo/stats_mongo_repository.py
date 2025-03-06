@@ -10,9 +10,10 @@ stats_collection_name = "stats"
 class StatsMongoRepository(StatsRepository):
     """MongoDB-based repository for Stats."""
 
+    # TODO: check lateer to remove user_id because is already included in the stats class
     async def persist(self, user_id: str, stats: Stats) -> None:
         """Save or update stats for a given user in MongoDB."""
-        stats_schema = StatsSchema.from_domain(user_id, stats)
+        stats_schema = StatsSchema.from_domain(stats)
         existing_stats = await mongoDbClient.get_collection(
             stats_collection_name
         ).find_one({"user_id": user_id})

@@ -81,13 +81,13 @@ class StatsSchema(BaseModel):
     stats: Dict[str, PlayerStatsSchema]
 
     @staticmethod
-    def from_domain(user_id: str, stats: Stats) -> "StatsSchema":
+    def from_domain(stats: Stats) -> "StatsSchema":
         """Convert domain Stats object into StatsSchema."""
         return StatsSchema(
-            user_id=user_id,
+            user_id=stats.user_id,
             stats={
                 user_id: PlayerStatsSchema.from_domain(player_stats)
-                for user_id, player_stats in stats.items()
+                for user_id, player_stats in stats.stats.items()
             },
         )
 
