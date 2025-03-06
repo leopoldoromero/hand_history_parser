@@ -159,7 +159,7 @@ class SummarySchema(BaseModel):
     community_cards: List[str]
     showdown: bool
     pot_type: str
-    last_phase_hero_folded: str
+    last_phase_hero_folded: Optional[str]
     hero_seat: int
 
     class Config:
