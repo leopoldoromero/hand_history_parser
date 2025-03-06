@@ -16,7 +16,8 @@ dependencies = [
     "databases (>=0.9.0,<0.10.0)",
     "motor (>=3.7.0,<4.0.0)",
     "six (>=1.17.0,<2.0.0)",
-    "dotenv (>=0.9.9,<0.10.0)"
+    "dotenv (>=0.9.9,<0.10.0)",
+    "python-jose[cryptography] (>=3.3.0,<4.0.0)"
 ]
 
 

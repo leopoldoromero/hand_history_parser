@@ -1,10 +1,10 @@
-FROM python:3.9-slim
+FROM python:3.9
 
 WORKDIR /app
 
 RUN pip install --no-cache-dir poetry
 
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml ./
 
 RUN poetry install --no-root
 
