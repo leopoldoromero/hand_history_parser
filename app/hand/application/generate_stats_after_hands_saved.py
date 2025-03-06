@@ -31,5 +31,5 @@ class GenerateStatsAfterHandsSaved:
 
         stats_generator = StatsGenerator(hands)
 
-        stats = stats_generator.execute()
+        stats = stats_generator.execute(user_id)
         await stats_mongo_repository.persist(user_id, stats)

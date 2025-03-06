@@ -34,6 +34,7 @@ async def run(user_id: str = Cookie(None)):
         return stats.stats
 
     except HTTPException as e:
+        print(f"EXCEPTION {e}")
         raise e
 
     except Exception as e:
