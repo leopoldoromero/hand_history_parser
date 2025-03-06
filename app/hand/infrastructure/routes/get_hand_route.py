@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, Cookie
-from app.hand.infrastructure.persistance.hand_json_repository import hand_repository
 from app.hand.infrastructure.dtos.hand_response import GetHandResponseDto
+from app.hand.infrastructure.persistance.mongo.hand_mongo_repository import (
+    hand_mongo_repository,
+)
 
 router = APIRouter(prefix="/v1", tags=["hands"])
 
@@ -22,9 +24,11 @@ async def run(hand_id: str, user_id: str = Cookie(None)):
         if not user_id:
             raise HTTPException(status_code=401, detail="Missing user_id in cookies")
 
-        hand, prev_hand_id, next_hand_id = await hand_repository.get_with_neighbors(
-            hand_id, user_id
-        )
+        (
+            hand,
+            prev_hand_id,
+            next_hand_id,
+        ) = await hand_mongo_repository.get_with_neighbors(hand_id, user_id)
 
         if not hand:
             raise HTTPException(status_code=404, detail="Hand not found")

@@ -6,27 +6,29 @@ from contextlib import asynccontextmanager
 from app.hand.application.generate_stats_after_hands_saved import (
     GenerateStatsAfterHandsSaved,
 )
+from app.shared.config.app_config import ALLOWED_HOSTS, APPLICATION_TITLE, OPENAPI_PATH
+from app.shared.infrastructure.persistance.mongo.db_client import mongoDbClient
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown lifecycle management."""
+    await mongoDbClient.connect_to_mongo()
     GenerateStatsAfterHandsSaved()  # ✅ Initialize here
-    yield  # Run the app
+    yield
     print("Shutting down...")
+    await mongoDbClient.close_mongo_connection()
 
 
 app = FastAPI(
-    title="Poker hand history parser",
-    openapi_url="/api/v1/openapi.json",
+    title=APPLICATION_TITLE,
+    openapi_url=OPENAPI_PATH,
     lifespan=lifespan,
 )
 
-DEFAULT_USER_ID = "75565b68-ed1f-11ef-901b-0ade7a4f7cd3"
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # ✅ Must include "http://"
+    allow_origins=ALLOWED_HOSTS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
