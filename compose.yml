@@ -1,0 +1,11 @@
+  hand-replayer-api:
+    image: ghcr.io/leopoldoromero/hand_history_parser:latest
+    env_file: ./hand-history-parser/.env
+    restart: always
+    networks:
+      - backend
+    ports: []
+    deploy:
+      resources:
+        limits:
+          memory: 128m
