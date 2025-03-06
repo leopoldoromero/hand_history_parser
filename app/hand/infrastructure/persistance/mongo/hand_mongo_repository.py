@@ -3,7 +3,8 @@ from app.hand.domain.hand_repository import HandRepository
 from app.hand.domain.hand import Hand
 from typing import Optional, Tuple
 from app.shared.infrastructure.persistance.mongo.db_client import mongoDbClient
-from app.shared.config.app_config import hands_collection_name
+
+hands_collection_name = "hands"
 
 
 class HandMongoRepository(HandRepository):

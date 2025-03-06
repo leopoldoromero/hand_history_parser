@@ -46,11 +46,6 @@ class PokerStarsEnglishParser:
             }
 
             pot_type = self.define_pot_type(processed_hand)
-            print(f"BTN Info: {table_name, table_type, button_seat}")
-            print(f"Hero name: {table_name, table_type, button_seat}")
-            print(f"SUMMARY: {summary}")
-            print(f"POT TYPE: {pot_type}")
-
             processed_hand["summary"]["pot_type"] = pot_type
 
             parsed_hands.append(processed_hand)

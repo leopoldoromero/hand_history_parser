@@ -3,7 +3,7 @@ from app.shared.config.app_config import (
     MONGODB_URL,
     MAX_CONNECTIONS_COUNT,
     MIN_CONNECTIONS_COUNT,
-    database_name,
+    MONGO_DB,
 )
 
 
@@ -25,7 +25,7 @@ class DataBase:
         print("MongoDb conection closed")
 
     def get_collection(self, collection_name: str):
-        return self.client[database_name][collection_name]
+        return self.client[MONGO_DB][collection_name]
 
 
 mongoDbClient = DataBase()
