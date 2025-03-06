@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+# from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
-from jose import JWTError, jwt
-from datetime import datetime, timedelta
+
+# from jose import JWTError, jwt
+# from datetime import datetime, timedelta
 from pydantic import BaseModel
 
 # Secret key & Algorithm
@@ -36,28 +38,28 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-# Verify password
-def verify_password(plain_password, hashed_password):
-    try:
-        return pwd_context.verify(plain_password, hashed_password)
-    except Exception as e:
-        raise Exception(e)
+# # Verify password
+# def verify_password(plain_password, hashed_password):
+#     try:
+#         return pwd_context.verify(plain_password, hashed_password)
+#     except Exception as e:
+#         raise Exception(e)
 
 
-# Create JWT token
-def create_access_token(data: dict, expires_delta: timedelta):
-    to_encode = data.copy()
-    expire = datetime.now() + expires_delta
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+# # Create JWT token
+# def create_access_token(data: dict, expires_delta: timedelta):
+#     to_encode = data.copy()
+#     expire = datetime.now() + expires_delta
+#     to_encode.update({"exp": expire})
+#     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-# Authenticate user
-def authenticate_user(email: str, password: str):
-    user = fake_users_db.get(email)
-    if not user or not verify_password(password, user["hashed_password"]):
-        return False
-    return user
+# # Authenticate user
+# def authenticate_user(email: str, password: str):
+#     user = fake_users_db.get(email)
+#     if not user or not verify_password(password, user["hashed_password"]):
+#         return False
+#     return user
 
 
 @router.get("/generate")
@@ -68,33 +70,33 @@ def generate_pass():
     return {"hashed_password": hashed_password}
 
 
-@router.post("/token")
-def login_for_access_token(login_data: LoginRequest):
-    user = authenticate_user(login_data.email, login_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+# @router.post("/token")
+# def login_for_access_token(login_data: LoginRequest):
+#     user = authenticate_user(login_data.email, login_data.password)
+#     if not user:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Invalid credentials",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
 
-    access_token = create_access_token(
-        data={"sub": user["id"]},
-        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
-    )
+#     access_token = create_access_token(
+#         data={"sub": user["id"]},
+#         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+#     )
 
-    return {"access_token": access_token, "token_type": "bearer"}
+#     return {"access_token": access_token, "token_type": "bearer"}
 
 
 # Protected route
-@router.get("/users/me")
-def read_users_me(token: str = Depends(oauth2_scheme)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = payload.get("sub")
-        if user_id is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+# @router.get("/users/me")
+# def read_users_me(token: str = Depends(oauth2_scheme)):
+#     try:
+#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+#         user_id = payload.get("sub")
+#         if user_id is None:
+#             raise HTTPException(status_code=401, detail="Invalid token")
+#     except JWTError:
+#         raise HTTPException(status_code=401, detail="Invalid token")
 
-    return {"id": user_id}
+#     return {"id": user_id}
