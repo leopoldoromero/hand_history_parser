@@ -230,7 +230,6 @@ class Hand:
 
     @staticmethod
     def from_primitives(data):
-        print("PRIMITIVEs", data.general_info)
         try:
             return Hand(
                 id=data["id"],

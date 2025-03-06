@@ -1,6 +1,10 @@
 from app.shared.infrastructure.event_bus import event_bus
-from app.hand.infrastructure.persistance.stats_json_repository import stats_repository
-from app.hand.infrastructure.persistance.hand_json_repository import hand_repository
+from app.hand.infrastructure.persistance.mongo.stats_mongo_repository import (
+    stats_mongo_repository,
+)
+from app.hand.infrastructure.persistance.mongo.hand_mongo_repository import (
+    hand_mongo_repository,
+)
 from app.hand.application.stats_generator import StatsGenerator
 
 
@@ -23,8 +27,9 @@ class GenerateStatsAfterHandsSaved:
     async def generate_stats(self, user_id: str):
         """Simulated stats generation process."""
         # await asyncio.sleep(1)  # Simulate processing delay
-        hands = await hand_repository.get_all(user_id)
+        hands = await hand_mongo_repository.get_all(user_id)
+
         stats_generator = StatsGenerator(hands)
 
         stats = stats_generator.execute()
-        await stats_repository.persist(user_id, stats)
+        await stats_mongo_repository.persist(user_id, stats)

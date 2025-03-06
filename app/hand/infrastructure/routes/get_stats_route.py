@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException, Cookie
-from app.hand.infrastructure.persistance.stats_json_repository import stats_repository
+from app.hand.infrastructure.persistance.mongo.stats_mongo_repository import (
+    stats_mongo_repository,
+)
 from app.hand.infrastructure.dtos.generate_stats_response import GenerateStatsResponse
 
 router = APIRouter(prefix="/v1", tags=["stats"])
@@ -22,14 +24,14 @@ async def run(user_id: str = Cookie(None)):
         if not user_id:
             raise HTTPException(status_code=401, detail="Missing user_id in cookies")
 
-        stats = await stats_repository.get_all(user_id)
+        stats = await stats_mongo_repository.get_all(user_id)
 
         if not stats:
             raise HTTPException(
-                status_code=404, detail="There are no stats available yet"
+                status_code=400, detail="There are no stats available yet"
             )
 
-        return stats
+        return stats.stats
 
     except HTTPException as e:
         raise e

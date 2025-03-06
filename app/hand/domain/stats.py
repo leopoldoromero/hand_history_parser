@@ -30,7 +30,18 @@ class PlayerStats:
         return {attr: getattr(self, attr) for attr in self.__dict__}
 
 
-class Stats(Dict[str, PlayerStats]):
+class Stats:
+    user_id: str
+    stats: Dict[str, PlayerStats]
+
+    def __init__(self, user_id: str, stats: Dict[str, PlayerStats]) -> None:
+        self.user_id = user_id
+        self.stats = stats
+
+    @staticmethod
+    def create(user_id: str, stats: Dict[str, PlayerStats]):
+        return Stats(user_id, stats)
+
     def to_primitives(self) -> Dict[str, Dict]:
         """Convert the entire Stats dictionary to a primitive dictionary."""
-        return {user: stats.to_primitives() for user, stats in self.items()}
+        return {user: stats.to_primitives() for user, stats in self.stats.items()}
