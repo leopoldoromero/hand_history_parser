@@ -26,8 +26,8 @@ class HandMongoRepository(HandRepository):
             {"id": hand_id}
         )
         if hand_data:
-            handEntiy = HandSchema(**hand_data)
-            return handEntiy.to_domain()
+            hand_entiy = HandSchema(**hand_data)
+            return hand_entiy.to_domain()
 
         return None
 

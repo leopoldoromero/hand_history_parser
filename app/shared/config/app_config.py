@@ -7,12 +7,13 @@ load_dotenv(".env")
 
 APPLICATION_TITLE = "Poker hand history parser"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
+JWT_ALGORITHM = "HS256"
 OPENAPI_PATH = "/api/v1/openapi.json"
 DEFAULT_USER_ID = "75565b68-ed1f-11ef-901b-0ade7a4f7cd3"
 
 MAX_CONNECTIONS_COUNT = int(os.getenv("MAX_CONNECTIONS_COUNT", 10))
 MIN_CONNECTIONS_COUNT = int(os.getenv("MIN_CONNECTIONS_COUNT", 10))
-SECRET_KEY = Secret(os.getenv("SECRET_KEY", "secret key for project"))
+JWT_SECRET_KEY = Secret(os.getenv("JWT_SECRET_KEY", "ssupersecretkey"))
 
 ALLOWED_HOSTS = CommaSeparatedStrings(os.getenv("ALLOWED_HOSTS", "*"))
 
