@@ -13,12 +13,18 @@ class HandMongoRepository(HandRepository):
     async def create(self, hand: Hand) -> None:
         """Insert a new hand into MongoDB."""
         hand_exist = await mongoDbClient.get_collection(hands_collection_name).find_one(
-            {"general_info.room_hand_id": hand.general_info.room_hand_id}
+            {
+                "general_info.room_hand_id": hand.general_info.room_hand_id,
+                "user_id": hand.user_id,
+            }
         )
         if not hand_exist:
+            print(f"HAND SAVED: {hand.id}, USER: {hand.user_id}")
             await mongoDbClient.get_collection(hands_collection_name).insert_one(
                 HandSchema.from_domain(hand).model_dump()
             )
+        else:
+            print(f"HAND ALREADY EXIST: {hand.id}, USER: {hand.user_id}")
 
     async def get(self, hand_id: str) -> Optional[Hand]:
         """Retrieve a hand by ID."""
