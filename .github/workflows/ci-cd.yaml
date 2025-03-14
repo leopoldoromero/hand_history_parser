@@ -75,8 +75,15 @@ jobs:
         id: login-ecr
         run: |
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ECR_URL
+      
       - name: Save credentials
         run: echo "$AWS_ECR_URL" > credentials
+
+      - name: Upload environment file
+        uses: actions/upload-artifact@v3
+        with:
+          name: env-file
+          path: .env
 
   build:
     runs-on: ubuntu-latest
@@ -87,6 +94,11 @@ jobs:
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y git
+
+      - name: Download environment file
+        uses: actions/download-artifact@v3
+        with:
+          name: env-file
 
       - name: Load environment variables
         run: source .env
