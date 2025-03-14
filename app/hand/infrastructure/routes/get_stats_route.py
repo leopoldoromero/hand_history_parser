@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, Cookie
-from app.hand.infrastructure.persistance.mongo.stats_mongo_repository import (
-    stats_mongo_repository,
-)
+from fastapi import APIRouter, HTTPException, Cookie, Depends
 from app.hand.infrastructure.dtos.generate_stats_response import GenerateStatsResponse
+from app.shared.infrastructure.di_container import get_dependency
+from app.hand.domain.stats_repository import (
+    StatsRepository,
+)
 
 router = APIRouter(prefix="/v1", tags=["stats"])
 
@@ -19,12 +20,17 @@ router = APIRouter(prefix="/v1", tags=["stats"])
         500: {"description": "Internal server error."},
     },
 )
-async def run(user_id: str = Cookie(None)):
+async def run(
+    user_id: str = Cookie(None),
+    stats_repository: StatsRepository = Depends(
+        lambda: get_dependency("stats_repository")
+    ),
+):
     try:
         if not user_id:
             raise HTTPException(status_code=401, detail="Missing user_id in cookies")
 
-        stats = await stats_mongo_repository.get_all(user_id)
+        stats = await stats_repository.get_all(user_id)
 
         if not stats:
             raise HTTPException(

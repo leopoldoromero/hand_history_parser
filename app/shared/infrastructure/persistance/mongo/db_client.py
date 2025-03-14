@@ -26,6 +26,3 @@ class DataBase:
 
     def get_collection(self, collection_name: str):
         return self.client[MONGO_DB][collection_name]
-
-
-mongoDbClient = DataBase()

@@ -1,18 +1,26 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, Cookie
+from fastapi import APIRouter, File, UploadFile, HTTPException, Cookie, Depends
 from fastapi.responses import JSONResponse
 from app.hand.infrastructure.dtos.upload_hands_response import UploadHandsResponseDto
 from app.history_parser.history_parser import HistoryParser
 from app.hand.domain.hand import Hand
 from app.shared.infrastructure.event_bus import event_bus
-from app.hand.infrastructure.persistance.mongo.hand_mongo_repository import (
-    hand_mongo_repository,
+from app.hand.domain.hand_repository import (
+    HandRepository,
 )
+from app.shared.infrastructure.di_container import get_dependency
+
 
 router = APIRouter(prefix="/v1", tags=["hands"])
 
 
 @router.post("/hands", response_model=UploadHandsResponseDto)
-async def run(file: UploadFile = File(...), user_id: str = Cookie(None)):
+async def run(
+    file: UploadFile = File(...),
+    user_id: str = Cookie(None),
+    hands_repository: HandRepository = Depends(
+        lambda: get_dependency("hands_repository")
+    ),
+):
     try:
         AVAILABLE_FILE_FORMATS = ["text/plain"]
 
@@ -44,7 +52,7 @@ async def run(file: UploadFile = File(...), user_id: str = Cookie(None)):
                     "summary": hand["summary"],
                 }
             )
-            await hand_mongo_repository.create(hand_instance)
+            await hands_repository.create(hand_instance)
 
         await event_bus.publish("hands_saved", {"user_id": user_id})
 
