@@ -99,6 +99,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: env-file
+          path: .env
 
       - name: Load environment variables
         run: source .env
@@ -134,8 +135,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Load environment variables
-        run: source .env
+      - name: Download environment file
+        uses: actions/download-artifact@v4
+        with:
+          name: env-file
+          path: .env
 
       - name: Update AWS Lambda function code
         run: |
