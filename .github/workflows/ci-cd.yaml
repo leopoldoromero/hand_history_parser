@@ -69,7 +69,7 @@ jobs:
         run: cat .env
       
       - name: Debug Environment Variables
-        run: printenv
+        run: ls -la
 
       - name: Authenticate Docker to AWS ECR
         id: login-ecr
