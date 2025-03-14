@@ -1,0 +1,81 @@
+image: docker:stable
+
+workflow:
+  rules:
+    - if: '$CI_MERGE_REQUEST_IID'
+      when: never
+    - if: '$CI_COMMIT_REF_NAME == "main"'
+      variables:
+        ENVIRONMENT: "production"
+        FUNCTION_NAME: "$FUNCTION_NAME_PRO"
+        AWS_ACCESS_KEY_ID: "$AWS_ACCESS_KEY_ID_PRO"
+        AWS_SECRET_ACCESS_KEY: "$AWS_SECRET_ACCESS_KEY_PRO"
+
+    - if: '$CI_COMMIT_REF_NAME == "staging"'
+      variables:
+        ENVIRONMENT: "staging"
+        FUNCTION_NAME: "$FUNCTION_NAME_STG"
+        AWS_ACCESS_KEY_ID: "$AWS_ACCESS_KEY_ID_STG"
+        AWS_SECRET_ACCESS_KEY: "$AWS_SECRET_ACCESS_KEY_STG"
+
+variables:
+  TAG: "financing-limit-calculator:${ENVIRONMENT}-${VERSION}-${CI_COMMIT_SHORT_SHA}"
+
+stages:
+  - pre
+  - build
+  - deploy
+
+prepare:
+  stage: pre
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  only:
+    - main
+    - staging
+  script:
+    - export VERSION=$(sed -n 's/^version = "\([^"]*\)"/\1/p' pyproject.toml)
+    - echo "VERSION=$VERSION" >> .env
+    - aws ecr get-login-password > credentials
+  artifacts:
+    paths:
+      - credentials
+      - .env
+    reports:
+      dotenv: .env
+
+build:
+  stage: build
+  only:
+    - main
+    - staging
+  before_script:
+    - apk add --no-cache git
+  script:
+    - docker build -t $TAG .
+    - docker login --username AWS --password-stdin $AWS_ECR_URL < credentials
+    - docker tag $TAG $AWS_ECR_URL/$TAG
+    - docker push $AWS_ECR_URL/$TAG
+  artifacts:
+    paths:
+      - .env 
+    reports:
+      dotenv: .env
+
+deploy:
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  stage: deploy
+  needs:
+    - job: build
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    - source .env
+  script:
+    - aws lambda update-function-code --function-name $FUNCTION_NAME --image-uri $AWS_ECR_URL/$TAG | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
+    - aws lambda wait function-updated --function-name $FUNCTION_NAME
+    - aws lambda update-function-configuration --function-name $FUNCTION_NAME --environment "Variables={}" | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "main"'
+      when: manual
+    - if: '$CI_COMMIT_REF_NAME == "staging"'
+      when: always

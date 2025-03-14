@@ -1,4 +1,3 @@
-import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from app.api.main import api_router
@@ -7,17 +6,20 @@ from app.hand.application.generate_stats_after_hands_saved import (
     GenerateStatsAfterHandsSaved,
 )
 from app.shared.config.app_config import ALLOWED_HOSTS, APPLICATION_TITLE, OPENAPI_PATH
-from app.shared.infrastructure.persistance.mongo.db_client import mongoDbClient
+from app.shared.infrastructure.tasks.task_scheduler import task_scheduler
+from app.shared.infrastructure.di_container import mongo_db_client
+from mangum import Mangum
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown lifecycle management."""
-    await mongoDbClient.connect_to_mongo()
+    task_scheduler.start()
+    await mongo_db_client.connect_to_mongo()
     GenerateStatsAfterHandsSaved()  # ✅ Initialize here
     yield
     print("Shutting down...")
-    await mongoDbClient.close_mongo_connection()
+    await mongo_db_client.close_mongo_connection()
 
 
 app = FastAPI(
@@ -36,5 +38,4 @@ app.add_middleware(
 
 app.include_router(api_router, prefix="/api")
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+handler = Mangum(app)

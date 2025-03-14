@@ -3,11 +3,11 @@ from app.shared.domain.criteria import Criteria
 from app.user.infrastructure.persistance.mongo.user_schema import UserSchema
 from app.user.domain.user_repository import UserRepository
 from app.user.domain.user import User
-from app.shared.infrastructure.persistance.mongo.db_client import mongoDbClient
 from typing import Optional
 from app.shared.infrastructure.persistance.mongo.criteria_to_mongo_query import (
     criteria_to_mongo_query,
 )
+from app.shared.infrastructure.persistance.mongo.db_client import DataBase
 
 users_collection_name = "users"
 
@@ -15,15 +15,18 @@ users_collection_name = "users"
 class UserMongoRepository(UserRepository):
     """MongoDB implementation of UserRepository."""
 
+    def __init__(self, conn: DataBase) -> None:
+        self.conn = conn
+
     async def create(self, user: User) -> None:
         """Insert a new user into MongoDB."""
-        await mongoDbClient.get_collection(users_collection_name).insert_one(
+        await self.conn.get_collection(users_collection_name).insert_one(
             UserSchema.from_domain(user).model_dump()
         )
 
     async def get(self, user_id: str) -> Optional[User]:
         """Retrieve a user by ID."""
-        user_data = await mongoDbClient.get_collection(users_collection_name).find_one(
+        user_data = await self.conn.get_collection(users_collection_name).find_one(
             {"id": user_id}
         )
         if user_data:
@@ -34,7 +37,7 @@ class UserMongoRepository(UserRepository):
 
     async def get_by_criteria(self, criteria: Criteria) -> List[User]:
         query, options = criteria_to_mongo_query(criteria)
-        cursor = mongoDbClient.get_collection(users_collection_name).find(query)
+        cursor = self.conn.get_collection(users_collection_name).find(query)
         if options["sort"]:
             cursor = cursor.sort(options["sort"])
         if options["skip"]:
@@ -44,6 +47,3 @@ class UserMongoRepository(UserRepository):
 
         users = await cursor.to_list(length=None)
         return [UserSchema(**user).to_domain() for user in users]
-
-
-users_mongo_repository = UserMongoRepository()
