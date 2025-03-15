@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ${{ github.workspace }}/hand_history_parser
+        working-directory: ${{ github.workspace }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
