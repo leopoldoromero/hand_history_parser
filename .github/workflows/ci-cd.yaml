@@ -75,7 +75,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: env-file
-          path: /home/runner/work/hand_history_parser/hand_history_parser/.env
+          path: '**/.env'
 
       - name: Authenticate Docker to AWS ECR
         id: login-ecr
