@@ -71,14 +71,14 @@ jobs:
       - name: Export version
         run: cat .env
       
-      - name: Debug Environment Variables
-        run: pwd && ls -la
+      - name: Copy .env to env.txt
+        run: cp .env env.txt
       
       - name: Upload environment file
         uses: actions/upload-artifact@v4
         with:
           name: env-file
-          path: .env
+          path: env.txt
           if-no-files-found: error
 
       - name: Authenticate Docker to AWS ECR
@@ -103,7 +103,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: env-file
-          path: prepare/.env
+          path: .
+
+      - name: Recreate .env from env.txt
+        run: mv env.txt .env
+
 
       - name: Load environment variables
         run: source .env
@@ -125,37 +129,40 @@ jobs:
           TAG: hand-replayer-api:${{ env.ENVIRONMENT }}-${{ steps.version.outputs.VERSION }}-${{ github.sha }}
           AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
 
-      - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+  #     - name: Set up AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v3
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ env.AWS_REGION }}
 
-      - name: Download environment file
-        uses: actions/download-artifact@v4
-        with:
-          name: env-file
-          path: prepare/.env
+  #     - name: Download environment file
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: env-file
+  #         path: .
 
-      - name: Update AWS Lambda function code
-        run: |
-          aws lambda update-function-code --function-name $FUNCTION_NAME --image-uri $AWS_ECR_URL/$TAG | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
-          aws lambda wait function-updated --function-name $FUNCTION_NAME
-        env:
-          FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
-          TAG: hand-replayer-api:${{ env.ENVIRONMENT }}-${{ steps.version.outputs.VERSION }}-${{ github.sha }}
-          AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
+  #     - name: Recreate .env from env.txt
+  #       run: mv env.txt .env
 
-      - name: Update AWS Lambda function configuration
-        run: |
-          aws lambda update-function-configuration --function-name $FUNCTION_NAME --environment "Variables={}" | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
-        env:
-          FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
+  #     - name: Update AWS Lambda function code
+  #       run: |
+  #         aws lambda update-function-code --function-name $FUNCTION_NAME --image-uri $AWS_ECR_URL/$TAG | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
+  #         aws lambda wait function-updated --function-name $FUNCTION_NAME
+  #       env:
+  #         FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
+  #         TAG: hand-replayer-api:${{ env.ENVIRONMENT }}-${{ steps.version.outputs.VERSION }}-${{ github.sha }}
+  #         AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
+
+  #     - name: Update AWS Lambda function configuration
+  #       run: |
+  #         aws lambda update-function-configuration --function-name $FUNCTION_NAME --environment "Variables={}" | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
+  #       env:
+  #         FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
