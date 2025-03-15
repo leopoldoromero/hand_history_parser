@@ -218,7 +218,7 @@ jobs:
 
       - name: Extract version from pyproject.toml
         id: version
-        run: echo "VERSION=$(sed -n 's/^version = \"\([^"]*\)\"/\1/p' pyproject.toml)" >> .env
+        run: echo "VERSION=$(sed -n 's/^version = \"\([^"]*\)\"/\1/p' pyproject.toml)" >> $GITHUB_ENV
 
       - name: Authenticate Docker to AWS ECR
         id: login-ecr
@@ -226,16 +226,16 @@ jobs:
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ECR_URL
 
       - name: Create Tag
-        run: echo "TAG=hand-replayer-api:${ENVIRONMENT}-${VERSION}-${GITHUB_SHA}" >> $GITHUB_ENV
+        run: echo "TAG=${ENVIRONMENT}-${VERSION}-${GITHUB_SHA}" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: docker build -t $TAG .
 
       - name: Tag Docker image
-        run: docker tag $TAG $AWS_ECR_URL/$TAG
+        run: docker tag $TAG $AWS_ECR_URL:$TAG
 
       - name: Push Docker image to ECR
-        run: docker push $AWS_ECR_URL/$TAG
+        run: docker push $AWS_ECR_URL:$TAG
 
 
 
