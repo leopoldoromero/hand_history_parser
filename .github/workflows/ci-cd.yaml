@@ -81,18 +81,19 @@ jobs:
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ECR_URL
 
       - name: Save Docker credentials
-        run: docker logout && cat ~/.docker/config.json > docker-config.json
+        run: aws ecr get-login-password > credentials
 
       - name: Upload environment file and credentials
         uses: actions/upload-artifact@v4
         with:
           name: env-file
           path: env.txt
+
       - name: Upload Docker credentials
         uses: actions/upload-artifact@v4
         with:
-          name: docker-credentials
-          path: docker-config.json
+          name: credentials
+          path: credentials
 
   build:
     runs-on: ubuntu-latest
@@ -115,18 +116,17 @@ jobs:
 
       - name: Load environment variables
         run: source .env
-      
-      - name: Print environment variables
-        run: cat .env
+
+      - name: Extract VERSION from .env
+        run: |
+          VERSION=$(cat .env | grep VERSION | cut -d '=' -f2)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Download Docker credentials
         uses: actions/download-artifact@v4
         with:
-          name: docker-credentials
-          path: ~/.docker
-
-      - name: Verify Docker login
-        run: docker info
+          name: credentials
+          path: credentials
 
       - name: Build Docker image
         run: docker build -t $TAG .
