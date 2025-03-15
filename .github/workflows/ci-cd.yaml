@@ -75,7 +75,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: env-file
-          path: $GITHUB_WORKSPACE/.env
+          path: ./hand_history_parser/.env
 
       - name: Authenticate Docker to AWS ECR
         id: login-ecr
