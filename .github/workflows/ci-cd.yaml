@@ -111,6 +111,9 @@ jobs:
 
       - name: Load environment variables
         run: source .env
+      
+      - name: Print environment variables
+        run: cat .env && printenv
 
       - name: Build Docker image
         run: docker build -t $TAG .
