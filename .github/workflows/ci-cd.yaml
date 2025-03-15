@@ -46,6 +46,7 @@ on:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
+  ENVIRONMENT: prod
 
 jobs:
   prepare:
@@ -113,12 +114,12 @@ jobs:
         run: source .env
       
       - name: Print environment variables
-        run: cat .env && printenv
+        run: cat .env
 
       - name: Build Docker image
         run: docker build -t $TAG .
         env:
-          TAG: hand-replayer-api:${{ env.ENVIRONMENT }}-${{ steps.version.outputs.VERSION }}-${{ github.sha }}
+          TAG: hand-replayer-api:${{ env.ENVIRONMENT }}-${{env.VERSION }}-${{ github.sha }}
 
       - name: Tag Docker image
         run: docker tag $TAG $AWS_ECR_URL/$TAG
