@@ -14,7 +14,8 @@ from mangum import Mangum
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown lifecycle management."""
-    task_scheduler.start()
+    if not task_scheduler.running:
+        task_scheduler.start()
     await mongo_db_client.connect_to_mongo()
     GenerateStatsAfterHandsSaved()  # ✅ Initialize here
     yield
