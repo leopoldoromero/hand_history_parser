@@ -138,6 +138,9 @@ jobs:
         env:
           TAG: hand-replayer-api:${{ env.ENVIRONMENT }}-${{ env.VERSION }}-${{ github.sha }}
           AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
+      
+      - name: Login to AWS ECR
+        run: docker login --username AWS --password-stdin $AWS_ECR_URL < credentials
 
       - name: Push Docker image to ECR
         run: docker push $AWS_ECR_URL/$TAG
