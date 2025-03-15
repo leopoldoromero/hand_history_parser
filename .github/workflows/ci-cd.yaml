@@ -71,24 +71,28 @@ jobs:
 
       - name: Export version
         run: cat .env
-      
+
       - name: Copy .env to env.txt
         run: cp .env env.txt
-      
-      - name: Upload environment file
-        uses: actions/upload-artifact@v4
-        with:
-          name: env-file
-          path: env.txt
-          if-no-files-found: error
 
       - name: Authenticate Docker to AWS ECR
         id: login-ecr
         run: |
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ECR_URL
-      
-      - name: Save credentials
-        run: echo "$AWS_ECR_URL" > credentials
+
+      - name: Save Docker credentials
+        run: docker logout && cat ~/.docker/config.json > docker-config.json
+
+      - name: Upload environment file and credentials
+        uses: actions/upload-artifact@v4
+        with:
+          name: env-file
+          path: env.txt
+      - name: Upload Docker credentials
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-credentials
+          path: docker-config.json
 
   build:
     runs-on: ubuntu-latest
@@ -109,29 +113,38 @@ jobs:
       - name: Recreate .env from env.txt
         run: mv env.txt .env
 
-
       - name: Load environment variables
         run: source .env
       
       - name: Print environment variables
         run: cat .env
 
+      - name: Download Docker credentials
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-credentials
+          path: ~/.docker
+
+      - name: Verify Docker login
+        run: docker info
+
       - name: Build Docker image
         run: docker build -t $TAG .
         env:
-          TAG: hand-replayer-api:${{ env.ENVIRONMENT }}-${{env.VERSION }}-${{ github.sha }}
+          TAG: hand-replayer-api:${{ env.ENVIRONMENT }}-${{ env.VERSION }}-${{ github.sha }}
 
       - name: Tag Docker image
         run: docker tag $TAG $AWS_ECR_URL/$TAG
         env:
-          TAG: hand-replayer-api:${{ env.ENVIRONMENT }}-${{ steps.version.outputs.VERSION }}-${{ github.sha }}
+          TAG: hand-replayer-api:${{ env.ENVIRONMENT }}-${{ env.VERSION }}-${{ github.sha }}
           AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
 
       - name: Push Docker image to ECR
         run: docker push $AWS_ECR_URL/$TAG
         env:
-          TAG: hand-replayer-api:${{ env.ENVIRONMENT }}-${{ steps.version.outputs.VERSION }}-${{ github.sha }}
+          TAG: hand-replayer-api:${{ env.ENVIRONMENT }}-${{ env.VERSION }}-${{ github.sha }}
           AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
+
 
   # deploy:
   #   runs-on: ubuntu-latest
