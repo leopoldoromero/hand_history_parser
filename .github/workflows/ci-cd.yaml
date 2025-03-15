@@ -50,6 +50,9 @@ env:
 jobs:
   prepare:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}/hand_history_parser
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -75,7 +78,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: env-file
-          path: '**/.env'
+          path: .env
+          if-no-files-found: error
 
       - name: Authenticate Docker to AWS ECR
         id: login-ecr
