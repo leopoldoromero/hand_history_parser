@@ -198,6 +198,7 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
   ENVIRONMENT: prod
+  FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
 
 jobs:
   build-and-push:
@@ -239,40 +240,38 @@ jobs:
 
 
 
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: build
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  #     - name: Set up AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v3
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ env.AWS_REGION }}
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-  #     - name: Download environment file
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: env-file
-  #         path: .
+      - name: Extract version from pyproject.toml
+        id: version
+        run: echo "VERSION=$(sed -n 's/^version = \"\([^"]*\)\"/\1/p' pyproject.toml)" >> $GITHUB_ENV
 
-  #     - name: Recreate .env from env.txt
-  #       run: mv env.txt .env
+      - name: Authenticate Docker to AWS ECR
+        id: login-ecr
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ECR_URL
 
-  #     - name: Update AWS Lambda function code
-  #       run: |
-  #         aws lambda update-function-code --function-name $FUNCTION_NAME --image-uri $AWS_ECR_URL/$TAG | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
-  #         aws lambda wait function-updated --function-name $FUNCTION_NAME
-  #       env:
-  #         FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
-  #         TAG: hand-replayer-api:${{ env.ENVIRONMENT }}-${{ steps.version.outputs.VERSION }}-${{ github.sha }}
-  #         AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
+      - name: Create Tag
+        run: echo "TAG=${ENVIRONMENT}-${VERSION}-${GITHUB_SHA}" >> $GITHUB_ENV
 
-  #     - name: Update AWS Lambda function configuration
-  #       run: |
-  #         aws lambda update-function-configuration --function-name $FUNCTION_NAME --environment "Variables={}" | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
-  #       env:
-  #         FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
+      - name: Update AWS Lambda function code
+        run: |
+          aws lambda update-function-code --function-name $FUNCTION_NAME --image-uri $AWS_ECR_URL:$TAG| jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
+          aws lambda wait function-updated --function-name $FUNCTION_NAME
+
+      - name: Update AWS Lambda function configuration
+        run: |
+          aws lambda update-function-configuration --function-name $FUNCTION_NAME --environment "Variables={}" | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
+
