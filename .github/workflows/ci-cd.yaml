@@ -216,14 +216,18 @@ jobs:
           TAG=${ENVIRONMENT}-$(sed -n 's/^version = \"\([^"]*\)\"/\1/p' pyproject.toml)-${GITHUB_SHA}
           echo "TAG=$TAG" >> .env
 
+      - name: Export variables to env-file
+        run: cp .env env-file
+
       - name: Export version and tag
-        run: cat .env
+        run: cat env-file
 
       - name: Upload environment file
         uses: actions/upload-artifact@v4
         with:
           name: env-file
-          path: .env
+          path: env-file
+          if-no-files-found: error
 
   build-and-push:
     runs-on: ubuntu-latest
@@ -251,6 +255,9 @@ jobs:
         with:
           name: env-file
           path: .
+
+      - name: Recreate .env from env-file
+        run: mv env-file .env
 
       - name: Load environment variables
         run: source .env
@@ -297,6 +304,9 @@ jobs:
         with:
           name: env-file
           path: .
+
+      - name: Recreate .env from env-file
+        run: mv env-file .env
 
       - name: Load environment variables
         run: source .env
