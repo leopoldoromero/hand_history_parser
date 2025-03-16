@@ -260,7 +260,10 @@ jobs:
         run: mv env-file .env
 
       - name: Load environment variables
-        run: source .env
+        run: |
+          source .env
+          echo "TAG=$TAG" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Authenticate Docker to AWS ECR
         id: login-ecr
@@ -309,7 +312,10 @@ jobs:
         run: mv env-file .env
 
       - name: Load environment variables
-        run: source .env
+        run: |
+          source .env
+          echo "TAG=$TAG" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Authenticate Docker to AWS ECR
         id: login-ecr
