@@ -1,0 +1,95 @@
+from app.hand.domain.hand import Hand
+import uuid
+
+mock_hand_dto = {
+    "id": str(uuid.uuid4()),
+    "user_id": str(uuid.uuid4()),
+    "general_info": {
+        "room_hand_id": "254983523057",
+        "datetime": "22-02-2025 12:22:30",
+        "game_type": "zoom",
+        "currency": "€",
+        "small_blind": 0.05,
+        "big_blind": 0.1,
+        "game": "Hold'em",
+        "room": "PokerStars",
+    },
+    "players": [
+        {"seat": 1, "name": "ELBatatoxx", "stack": 10.0},
+        {"seat": 2, "name": "javiercg1", "stack": 18.12},
+        {"seat": 3, "name": "pelayoisla", "stack": 14.92},
+        {"seat": 4, "name": "deyvitfpt", "stack": 12.25},
+        {"seat": 5, "name": "Juananjab", "stack": 9.73},
+        {"seat": 6, "name": "Nicoromero87", "stack": 19.7},
+    ],
+    "hero_cards": ["7c", "Qd"],
+    "hero_name": "Nicoromero87",
+    "hero_seat": 6,
+    "actions": [
+        {
+            "phase": "PRE-FLOP",
+            "player": "javiercg1",
+            "action": "small_blind",
+            "amount": 0.05,
+            "cards": [],
+        },
+        {
+            "phase": "PRE-FLOP",
+            "player": "pelayoisla",
+            "action": "big_blind",
+            "amount": 0.1,
+            "cards": [],
+        },
+        {
+            "phase": "PRE-FLOP",
+            "player": "deyvitfpt",
+            "action": "fold",
+            "amount": None,
+            "cards": [],
+        },
+        {
+            "phase": "PRE-FLOP",
+            "player": "Juananjab",
+            "action": "fold",
+            "amount": None,
+            "cards": [],
+        },
+        {
+            "phase": "PRE-FLOP",
+            "player": "Nicoromero87",
+            "action": "fold",
+            "amount": None,
+            "cards": [],
+        },
+        {
+            "phase": "PRE-FLOP",
+            "player": "ELBatatoxx",
+            "action": "fold",
+            "amount": None,
+            "cards": [],
+        },
+        {
+            "phase": "PRE-FLOP",
+            "player": "javiercg1",
+            "action": "fold",
+            "amount": None,
+            "cards": [],
+        },
+    ],
+    "summary": {
+        "pot": 0.1,
+        "rake": 0.0,
+        "winner": {"seat": 3, "name": "pelayoisla", "cards": [], "amount": 0.1},
+        "looser": None,
+        "community_cards": [],
+        "showdown": False,
+        "last_phase_hero_folded": "PRE_FLOP",
+        "pot_type": "UNOPENED",
+        "hero_seat": 6,
+    },
+    "table_name": "Caph",
+    "table_type": "6-max",
+    "button_seat": 1,
+}
+
+mock_hand = Hand.from_primitives(mock_hand_dto)

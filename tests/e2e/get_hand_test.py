@@ -1,66 +1,71 @@
 import pytest
+import uuid
+from fastapi import status
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock, patch
+from httpx import ASGITransport, AsyncClient
 from app.main import app
-from app.hand.infrastructure.persistance.hand_json_repository import hand_repository
+from app.shared.infrastructure.di_container import get_dependency, mongo_db_client
+from app.hand.domain.hand_repository import HandRepository
+from tests.mocks.hand_mock import mock_hand
 
 client = TestClient(app)
 
 
-@pytest.fixture
-def mock_hand_repository():
-    """Mock the hand_repository to avoid real service calls."""
-    with patch.object(
-        hand_repository, "get_with_neighbors", new_callable=AsyncMock
-    ) as mock_repo:
-        yield mock_repo
+# Async fixture setup and teardown
+@pytest.fixture(scope="module")
+async def test_hand():
+    # Ensure MongoDB is connected before tests run
+    await mongo_db_client.connect_to_mongo()
+
+    hand_id = mock_hand.id
+    user_id = mock_hand.user_id
+    hands_repository: HandRepository = get_dependency("hands_repository")
+
+    # Create a test hand record
+    await hands_repository.create(mock_hand)
+
+    yield hand_id, user_id
+
+    # Clean up after tests (async operation)
+    await hands_repository.delete_all(mock_hand.user_id)
+
+    # Close MongoDB connection after tests
+    await mongo_db_client.close_mongo_connection()
 
 
-test_user_id = "01a01v02-ed1f-11ef-901b-0ade7a4f7cd3"
-
-# TODO: commented while the environment ets configured
-# def test_get_hand_success():
-#     """Test retrieving a hand successfully (200 OK)."""
-#     existing_hand_id = "785dd6d5-5391-498e-abbf-b9018fdfc0f3"
-
-#     response = client.get(
-#         "/api/v1/hands/785dd6d5-5391-498e-abbf-b9018fdfc0f3",
-#         cookies={"user_id": test_user_id},
-#     )
-
-#     assert response.status_code == 200
-#     json_data = response.json()
-#     assert json_data["hand"]["id"] == existing_hand_id
-#     assert json_data["prev_hand_id"] is None
-#     assert json_data["next_hand_id"] is None
+@pytest.mark.anyio
+async def test_get_hand_success(test_hand):
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        hand_id, user_id = test_hand
+        response = await ac.get(
+            f"/api/v1/hands/{hand_id}", cookies={"user_id": user_id}
+        )
+    assert response.status_code == 200  # Expect 200 OK status
+    assert "hand" in response.json()
+    assert response.json()["hand"]["id"] == hand_id
+    assert response.json()["prev_hand_id"] is None
+    assert response.json()["next_hand_id"] is None
 
 
-def test_get_hand_missing_user_id():
-    """Test error when user_id is missing in cookies (401 Unauthorized)."""
-    response = client.get("/api/v1/hands/hand123")  # No cookies
-
-    assert response.status_code == 401
-    assert response.json()["detail"] == "Missing user_id in cookies"
-
-
-def test_get_hand_not_found():
-    """Test handling when the requested hand is not found (404 Not Found)."""
-
-    response = client.get(
-        "/api/v1/hands/hand_not_found", cookies={"user_id": test_user_id}
-    )
-
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Hand not found"
+@pytest.mark.anyio
+async def test_get_hand_not_found():
+    fake_hand_id = str(uuid.uuid4())
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        response = await ac.get(
+            f"/api/v1/hands/{fake_hand_id}", cookies={"user_id": str(uuid.uuid4())}
+        )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_get_hand_internal_server_error(mock_hand_repository):
-    """Test handling of unexpected server error (500 Internal Server Error)."""
-    mock_hand_repository.side_effect = Exception(
-        "Unexpected DB error"
-    )  # Simulate error
-
-    response = client.get("/api/v1/hands/hand123", cookies={"user_id": "valid_user"})
-
-    assert response.status_code == 500
-    assert "Error retrieving hand" in response.json()["detail"]
+@pytest.mark.anyio
+async def test_get_hand_missing_user_id():
+    fake_hand_id = str(uuid.uuid4())
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        response = await ac.get(f"/api/v1/hands/{fake_hand_id}")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
