@@ -1,7 +1,7 @@
+import jwt
 from fastapi import APIRouter, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
-import jwt
 
 # from jose import JWTError, jwt
 from datetime import datetime, timedelta

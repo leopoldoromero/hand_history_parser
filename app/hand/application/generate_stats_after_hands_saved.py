@@ -1,4 +1,3 @@
-from fastapi import Depends
 from app.shared.infrastructure.event_bus import event_bus
 from app.shared.infrastructure.di_container import get_dependency
 from app.hand.domain.hand_repository import (
@@ -15,12 +14,8 @@ class GenerateStatsAfterHandsSaved:
 
     def __init__(
         self,
-        hands_repository: HandRepository = Depends(
-            lambda: get_dependency("hands_repository")
-        ),
-        stats_repository: StatsRepository = Depends(
-            lambda: get_dependency("stats_repository")
-        ),
+        hands_repository: HandRepository = get_dependency("hands_repository"),
+        stats_repository: StatsRepository = get_dependency("stats_repository"),
     ):
         print("Load...")
         self.hands_repository = hands_repository
@@ -31,7 +26,10 @@ class GenerateStatsAfterHandsSaved:
         """Callback to generate stats when a new hand is saved."""
         user_id = data["user_id"]
         print(f"📊 Generating stats for (user: {user_id})...")
-        await self.generate_stats(user_id)
+        try:
+            await self.generate_stats(user_id)
+        except Exception as e:
+            print(f"Exception generating stats: {e}")
         """
         await stats_repository.persist(user_id)
         """
