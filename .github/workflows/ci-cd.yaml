@@ -211,6 +211,9 @@ jobs:
         id: version
         run: echo "VERSION=$(sed -n 's/^version = \"\([^"]*\)\"/\1/p' pyproject.toml)" >> .env
 
+      - name: Debug FUNCTION_NAME (safe)
+        run: echo "FUNCTION_NAME starts with ${FUNCTION_NAME:0:10}"
+
       - name: Create Tag
         run: |
           TAG=${ENVIRONMENT}-$(sed -n 's/^version = \"\([^"]*\)\"/\1/p' pyproject.toml)-${GITHUB_SHA}
