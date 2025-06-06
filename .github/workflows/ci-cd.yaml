@@ -133,5 +133,5 @@ jobs:
 
       - name: Update AWS Lambda function configuration
         run: |
-          - aws lambda update-function-configuration --function-name $FUNCTION_NAME --environment "Variables={MONGODB_URL=$MONGODB_URL}" | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
+          aws lambda update-function-configuration --function-name $FUNCTION_NAME --environment "Variables={MONGODB_URL=$MONGODB_URL}" | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
 
