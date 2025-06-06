@@ -10,6 +10,7 @@ env:
   AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
   ENVIRONMENT: prod
   FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
+  MONGODB_URL: ${{ secrets.MONGODB_URL }}
 
 jobs:
   prepare:
