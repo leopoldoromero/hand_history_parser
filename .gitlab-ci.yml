@@ -73,7 +73,7 @@ deploy:
   script:
     - aws lambda update-function-code --function-name $FUNCTION_NAME --image-uri $AWS_ECR_URL/$TAG | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
     - aws lambda wait function-updated --function-name $FUNCTION_NAME
-    - aws lambda update-function-configuration --function-name $FUNCTION_NAME --environment "Variables={}" | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
+    - aws lambda update-function-configuration --function-name $FUNCTION_NAME --environment "Variables={MONGODB_URL=$MONGODB_URL}" | jq 'if .Environment? then .Environment.Variables = "REDACTED" else . end'
   rules:
     - if: '$CI_COMMIT_REF_NAME == "main"'
       when: manual

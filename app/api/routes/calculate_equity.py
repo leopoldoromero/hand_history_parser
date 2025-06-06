@@ -6,19 +6,27 @@ from app.equity_calculator.hand_vs_range_calculator import HandVsRangeEquityCalc
 
 router = APIRouter(prefix="/v1", tags=["calculate"])
 
+
 @router.post("/calculate/equity", response_model=CalculateHandVsRangeEquityResponse)
 async def run(
-    request: CalculateHandVsRangeEquityRequest = None,
+    request: CalculateHandVsRangeEquityRequest,
 ):
     try:
         calculator = HandVsRangeEquityCalculator()
 
-        hand_equity, range_equity, tie_equity = calculator.execute(request.hand, request.range, request.board)
+        hand_equity, range_equity, tie_equity = calculator.execute(
+            request.hand, request.range, request.board
+        )
 
-        return JSONResponse({
-            "hand_equity": hand_equity,
-            "range_equity": range_equity,
-            "tie_equity": tie_equity,
-        })
+        return JSONResponse(
+            {
+                "hand_equity": hand_equity,
+                "range_equity": range_equity,
+                "tie_equity": tie_equity,
+            }
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error calculating the equity of the hand: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error calculating the equity of the hand: {str(e)}",
+        )
