@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from app.api.dtos.calculate_equity_response import CalculateHandVsRangeEquityResponse
 from app.api.dtos.calculate_equity_request import CalculateHandVsRangeEquityRequest
 from app.equity_calculator.hand_vs_range_calculator import HandVsRangeEquityCalculator
+import time
 
 router = APIRouter(prefix="/v1", tags=["calculate"])
 
@@ -13,10 +14,12 @@ async def run(
 ):
     try:
         calculator = HandVsRangeEquityCalculator()
+        start = time.time()
 
         hand_equity, range_equity, tie_equity = calculator.execute(
             request.hand, request.range, request.board
         )
+        print(f"Calculation done in {time.time() - start:.2f}s")
 
         return JSONResponse(
             {
