@@ -1,15 +1,16 @@
-from fastapi import APIRouter, HTTPException, Cookie, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from app.hand.infrastructure.dtos.delete_hands_response import DeleteHandsResponseDto
 from app.hand.domain.hand_repository import (
     HandRepository,
 )
 from app.shared.infrastructure.di_container import get_dependency
+from app.shared.infrastructure.auth.extract_guest_id import extract_guest_id
 
-router = APIRouter(prefix="/v1", tags=["hands"])
+router = APIRouter()
 
 
 @router.delete(
-    "/hands",
+    "/",
     response_model=DeleteHandsResponseDto,
     summary="Delete user hands",
     description="Delete all the hands uploaded by the user.",
@@ -20,16 +21,16 @@ router = APIRouter(prefix="/v1", tags=["hands"])
     },
 )
 async def run(
-    user_id: str = Cookie(None),
+    guest_id: str = Depends(extract_guest_id),
     hands_repository: HandRepository = Depends(
         lambda: get_dependency("hands_repository")
     ),
 ):
     try:
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Missing user_id in cookies")
+        if not guest_id:
+            raise HTTPException(status_code=401, detail="Missing guest_id in cookies")
 
-        await hands_repository.delete_all(user_id)
+        await hands_repository.delete_all(guest_id)
 
         return {"success": True}
 

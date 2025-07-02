@@ -1,11 +1,13 @@
-from fastapi import APIRouter, HTTPException, Cookie, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from app.hand.infrastructure.dtos.generate_stats_response import GenerateStatsResponse
 from app.shared.infrastructure.di_container import get_dependency
 from app.hand.domain.stats_repository import (
     StatsRepository,
 )
+from app.shared.infrastructure.auth.get_optional_auth_user import get_optional_auth_user
+from app.shared.infrastructure.auth.extract_guest_id import extract_guest_id
 
-router = APIRouter(prefix="/v1", tags=["stats"])
+router = APIRouter()
 
 
 @router.get(
@@ -21,14 +23,17 @@ router = APIRouter(prefix="/v1", tags=["stats"])
     },
 )
 async def run(
-    user_id: str = Cookie(None),
+    guest_id: str = Depends(extract_guest_id),
     stats_repository: StatsRepository = Depends(
         lambda: get_dependency("stats_repository")
     ),
+    user=Depends(get_optional_auth_user),
 ):
     try:
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Missing user_id in cookies")
+        if not user and not guest_id:
+            raise HTTPException(status_code=401, detail="Missing token and guest_id")
+
+        user_id = user.id if user else guest_id
 
         stats = await stats_repository.get_all(user_id)
 
@@ -37,7 +42,7 @@ async def run(
                 status_code=400, detail="There are no stats available yet"
             )
 
-        return stats.stats
+        return stats.players_stats
 
     except HTTPException as e:
         print(f"EXCEPTION {e}")

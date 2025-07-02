@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from app.hand.domain.hand import Hand
 from typing import List, Optional, Tuple
+from app.shared.domain.criteria import Criteria
 
 
 class HandRepository(ABC):
@@ -17,7 +18,12 @@ class HandRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_all(self, user_id: str) -> List[Hand]:
+    async def get_all_by_user(self, user_id: str) -> List[Hand]:
+        """Retrieve a hand by ID."""
+        pass
+
+    @abstractmethod
+    async def get_all_by_criteria(self, criteria: Optional[Criteria]) -> List[Hand]:
         """Retrieve a hand by ID."""
         pass
 

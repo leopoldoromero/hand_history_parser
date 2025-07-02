@@ -11,6 +11,6 @@ class StatsRepository(ABC):
         pass
 
     @abstractmethod
-    async def persist(self, user_id: str, stats: Stats) -> None:
+    async def persist(self, stats: Stats) -> None:
         """Create a new hand."""
         pass

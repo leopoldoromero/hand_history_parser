@@ -14,16 +14,16 @@ class StatsMongoRepository(StatsRepository):
         self.conn = conn
 
     # TODO: check lateer to remove user_id because is already included in the stats class
-    async def persist(self, user_id: str, stats: Stats) -> None:
+    async def persist(self, stats: Stats) -> None:
         """Save or update stats for a given user in MongoDB."""
         stats_schema = StatsSchema.from_domain(stats)
         existing_stats = await self.conn.get_collection(stats_collection_name).find_one(
-            {"user_id": user_id}
+            {"user_id": stats.user_id}
         )
 
         if existing_stats:
             await self.conn.get_collection(stats_collection_name).update_one(
-                {"user_id": user_id},
+                {"user_id": stats.user_id},
                 {"$set": stats_schema.model_dump()},
             )
         else:
@@ -33,16 +33,12 @@ class StatsMongoRepository(StatsRepository):
 
     async def get_all(self, user_id: str) -> Optional[Stats]:
         """Retrieve stats for a given user from MongoDB."""
-        stats_cursor = self.conn.get_collection(stats_collection_name).find(
+        stats_data = await self.conn.get_collection(stats_collection_name).find_one(
             {"user_id": user_id}
         )
-        stats_data = await stats_cursor.to_list(length=None)
         # stats_data = await mongoDbClient.get_collection(stats_collection_name).find_one(
         #     {"user_id": user_id}
         # )
         if stats_data:
-            stats_schema = StatsSchema(
-                user_id=stats_data[0]["user_id"], stats=stats_data[0]["stats"]
-            )
-            return stats_schema.to_domain()
+            return StatsSchema(**stats_data).to_domain()
         return None

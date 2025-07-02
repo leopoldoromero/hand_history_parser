@@ -2,11 +2,11 @@ from app.hand.application.action_handlers.action_handler_factory import (
     ActionHandlerFactory,
 )
 from app.hand.domain.stats import PlayerStats
-from collections import defaultdict
+from typing import List
 
 
 class GameStateHandler:
-    def __init__(self, player_stats: defaultdict[str, PlayerStats]):
+    def __init__(self, player_stats: List[PlayerStats] = []):
         self.state = "UNOPENED"
         self.metadata = {
             "last_aggressor": None,
@@ -14,6 +14,10 @@ class GameStateHandler:
             "facing_players": [],
             "player_order": [],
         }
+        if not len(player_stats):
+            raise ValueError(
+                "GameStateHandler must be initialized with a valid list, recieved empty."
+            )
         self.player_stats = player_stats
         self.handler_factory = ActionHandlerFactory()
 
@@ -55,5 +59,10 @@ class GameStateHandler:
                     self.metadata[key] = value
 
     def update_player_stat(self, player: str, stat: str):
-        """Update the player's stats using the PlayerStats class."""
-        self.player_stats[player].__dict__[stat] += 1
+        print(
+            f"List by name: {list(map(lambda ps: ps.name, self.player_stats))}, FOR NAME: {player}"
+        )
+        player_stat = next((ps for ps in self.player_stats if ps.name == player), None)
+        if not player_stat:
+            raise ValueError(f"Player '{player}' not found in stats list.")
+        player_stat.increment(stat)

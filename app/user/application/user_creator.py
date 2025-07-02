@@ -1,25 +1,22 @@
-from fastapi import Depends
 from app.user.domain.user import User
 from app.shared.infrastructure.crypto.crypto_utils import hash_password
 from app.shared.domain.criteria import Criteria, CriteriaFilter, CriteriaOperators
-from app.user.domain.exceptions.user_already_exist_exception import (
+from app.user.domain.exceptions import (
     UserAlreadyExistException,
 )
 from app.user.domain.user_repository import UserRepository
-from app.shared.infrastructure.di_container import get_dependency
+from typing import Optional
 
 
 class UserCreator:
     def __init__(
         self,
-        users_repository: UserRepository = Depends(
-            lambda: get_dependency("users_repository")
-        ),
+        user_repository: UserRepository,
     ) -> None:
-        self.users_repository = users_repository
+        self.user_repository = user_repository
 
-    async def execute(self, email: str, password: str):
-        user_or_null = await self.users_repository.get_by_criteria(
+    async def execute(self, email: str, password: str, username: Optional[str] = None):
+        user_or_null = await self.user_repository.get_by_criteria(
             criteria=Criteria(
                 filters=[
                     CriteriaFilter(
@@ -34,8 +31,5 @@ class UserCreator:
             raise UserAlreadyExistException()
 
         hashed_password = hash_password(password)
-        user = User.create(email=email, password=hashed_password)
-        await self.users_repository.create(user)
-
-
-user_creator = UserCreator()
+        user = User.create(email=email, password=hashed_password, username=username)
+        await self.user_repository.create(user)

@@ -37,9 +37,11 @@ class GenerateStatsAfterHandsSaved:
     async def generate_stats(self, user_id: str):
         """Simulated stats generation process."""
         # await asyncio.sleep(1)  # Simulate processing delay
-        hands = await self.hands_repository.get_all(user_id)
+        hands = await self.hands_repository.get_all_by_user(user_id)
 
+        print(f"Recovered Hands: {len(hands)}")
         stats_generator = StatsGenerator(hands)
 
         stats = stats_generator.execute(user_id)
-        await self.stats_repository.persist(user_id, stats)
+        print(f"Calcualted stats: {stats}")
+        await self.stats_repository.persist(stats)

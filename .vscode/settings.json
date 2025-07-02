@@ -2,5 +2,8 @@
     "python.linting.enabled": true,
     "python.linting.linter": "ruff",
     "editor.formatOnSave": true,
-    "python.analysis.typeCheckingMode": "basic"
+    "python.analysis.typeCheckingMode": "basic",
+    "python.defaultInterpreterPath": "/Users/leopoldoromero/Library/Caches/pypoetry/virtualenvs/app-Ta2bYKgX-py3.9",
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.analysis.extraPaths": ["../app"]
 }

@@ -1,5 +1,8 @@
-class InvalidCredentialsException(Exception):
-    """Base class for custom application exceptions."""
+from app.shared.domain import BaseAppException, ErrorCode
 
+
+class InvalidCredentialsException(BaseAppException):
     def __init__(self):
-        self.detail = "Invalid credentials"
+        super().__init__(
+            message="Invalid email or password", code=ErrorCode.INVALID_CREDENTIALS
+        )

@@ -1,4 +1,3 @@
-from collections import defaultdict
 from app.hand.domain.hand import Hand
 from app.hand.domain.stats import PlayerStats, Stats
 from app.hand.application.game_state_handler import GameStateHandler
@@ -7,14 +6,7 @@ from app.hand.application.game_state_handler import GameStateHandler
 class StatsGenerator:
     def __init__(self, hands):
         self.hands = hands
-        self.players_stats: defaultdict[str, PlayerStats] = defaultdict(
-            PlayerStats
-        )  # Ensuring proper types
-
-    #     self.state_handler = GameStateHandler(self.players_stats)
-
-    # def get_pot_type(self):
-    #     return self.state_handler.state
+        self.players_stats = []
 
     def is_preflop(self, action):
         return action.phase == "PRE-FLOP"
@@ -25,7 +17,14 @@ class StatsGenerator:
             "call",
             "raise",
         ]:
-            self.players_stats[player].three_bet_opp += 1
+            player_stat = next(
+                (ps for ps in self.players_stats if ps.name == player), None
+            )
+            if not player_stat:
+                raise ValueError(
+                    f"Player '{player}' not found in stats list. StatsGenerator"
+                )
+            player_stat.increment("three_bet_opp")
 
     def process_hand(self, hand: Hand):
         print(f"Procceesing hand: {hand.general_info.room_hand_id}")
@@ -50,6 +49,15 @@ class StatsGenerator:
         if big_blind:
             players_order.append(big_blind)
 
+        if len(self.players_stats) == 0:
+            self.players_stats = [PlayerStats(name=player) for player in players_order]
+        else:
+            current_players = [ps.name for ps in self.players_stats]
+            self.players_stats = self.players_stats + [
+                PlayerStats(name=player)
+                for player in players_order
+                if player not in current_players
+            ]
         state_handler = GameStateHandler(self.players_stats)
         state_handler.metadata["player_order"] = players_order
 
@@ -60,14 +68,17 @@ class StatsGenerator:
             state_handler.handle_action(player, action_name)
 
         for player in set(players_order):
-            self.players_stats[player].hands += 1
+            player_stat = next(
+                (ps for ps in self.players_stats if ps.name == player), None
+            )
+            if not player_stat:
+                raise ValueError(
+                    f"Player '{player}' not found in stats list. StatsGenerator"
+                )
+            player_stat.increment("hands")
 
     def calculate_vpip(self, hands_played, stats):
-        if hands_played == 0:
-            return 0.0  # If no hands were played, VPIP is 0%
-
-        # Calculate voluntary actions: LIMP, OR, ROL, THREE_BET, SQUEEZE, FOUT_BET
-        voluntary_actions = (
+        voluntary = (
             stats.limp
             + stats.open_raise
             + stats.rol
@@ -75,9 +86,7 @@ class StatsGenerator:
             + stats.squeeze
             + stats.four_bet
         )
-
-        # Calculate VPIP as the percentage of hands where the player voluntarily put money in the pot
-        return (voluntary_actions / hands_played) * 100 if hands_played else 0.0
+        return (voluntary / hands_played) * 100 if hands_played else 0.0
 
     def calculate_pfr(self, hands_played, hands_raised):
         return hands_raised / hands_played * 100 if hands_played else 0.0
@@ -89,7 +98,7 @@ class StatsGenerator:
         for hand in self.hands:
             self.process_hand(hand)
 
-        for player_name, stats in self.players_stats.items():
+        for stats in self.players_stats:
             vpip = self.calculate_vpip(stats.hands, stats)
             hands_raised = (
                 stats.open_raise
@@ -103,8 +112,9 @@ class StatsGenerator:
                 stats.three_bet + stats.squeeze, stats.three_bet_opp
             )
 
-            stats.vpip = round(vpip, 2)
-            stats.pfr = round(pfr, 2)
-            stats.three_bet_percent = round(three_bet_percentage, 2)
+            stats.set_att("vpip", round(vpip, 2))
+            stats.set_att("pfr", round(pfr, 2))
+            stats.set_att("three_bet_percent", round(three_bet_percentage, 2))
+            stats.set_att("is_hero", stats.name == self.hands[0].hero_name)
 
         return Stats(user_id, self.players_stats)

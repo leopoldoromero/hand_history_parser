@@ -1,8 +1,8 @@
 import re
 from app.domain.poker_rooms import PokerRoom
-from app.stats_generator.game_state_handler import GameStateHandler
-from collections import defaultdict
+from app.hand.application.game_state_handler import GameStateHandler
 import uuid
+from app.hand.domain.stats import PlayerStats
 
 
 class PokerStarsSpanishParser:
@@ -68,7 +68,6 @@ class PokerStarsSpanishParser:
         return table_name, table_type, button_seat
 
     def define_pot_type(self, hand):
-        state_handler = GameStateHandler(defaultdict(lambda: defaultdict(int)))
         pre_flop_actions = list(
             filter(lambda action: action["phase"] == "PRE-FLOP", hand["actions"])
         )
@@ -97,6 +96,10 @@ class PokerStarsSpanishParser:
             players_order.append(small_blind)
         if big_blind:
             players_order.append(big_blind)
+
+        players_stats = [PlayerStats(name=player) for player in players_order]
+
+        state_handler = GameStateHandler(players_stats)
 
         state_handler.metadata["player_order"] = players_order
 

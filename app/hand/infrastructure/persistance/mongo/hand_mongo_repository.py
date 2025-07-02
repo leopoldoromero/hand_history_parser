@@ -1,8 +1,12 @@
 from app.hand.infrastructure.persistance.mongo.hand_schema import HandSchema
 from app.hand.domain.hand_repository import HandRepository
 from app.hand.domain.hand import Hand
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 from app.shared.infrastructure.persistance.mongo.db_client import DataBase
+from app.shared.domain.criteria import Criteria
+from app.shared.infrastructure.persistance.mongo.criteria_to_mongo_query import (
+    criteria_to_mongo_query,
+)
 
 hands_collection_name = "hands"
 
@@ -40,13 +44,31 @@ class HandMongoRepository(HandRepository):
 
         return None
 
-    async def get_all(self, user_id: str) -> list[Hand]:
+    async def get_all_by_user(self, user_id: str) -> list[Hand]:
         """Retrieve all hands belonging to a specific user."""
         hands_cursor = self.conn.get_collection(hands_collection_name).find(
             {"user_id": user_id}
         )
         hands_list = await hands_cursor.to_list(length=None)
         return [HandSchema(**hand).to_domain() for hand in hands_list]
+
+    async def get_all_by_criteria(self, criteria: Optional[Criteria]) -> List[Hand]:
+        if criteria is None:
+            cursor = self.conn.get_collection(hands_collection_name).find({})
+            hands = await cursor.to_list(length=None)
+            return [HandSchema(**hand).to_domain() for hand in hands]
+
+        query, options = criteria_to_mongo_query(criteria)
+        cursor = self.conn.get_collection(hands_collection_name).find(query)
+        if options["sort"]:
+            cursor = cursor.sort(options["sort"])
+        if options["skip"]:
+            cursor = cursor.skip(options["skip"])
+        if options["limit"]:
+            cursor = cursor.limit(options["limit"])
+
+        hands = await cursor.to_list(length=None)
+        return [HandSchema(**hand).to_domain() for hand in hands]
 
     async def get_with_neighbors(
         self, hand_id: str, user_id: str

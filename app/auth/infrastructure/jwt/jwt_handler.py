@@ -1,38 +1,34 @@
 import jwt
-from jwt.exceptions import InvalidTokenError
 from datetime import datetime, timedelta
 from app.shared.config.app_config import (
     JWT_ALGORITHM,
     ACCESS_TOKEN_EXPIRE_MINUTES,
+    ACCESS_TOKEN_EXPIRE_DAYS,
     JWT_SECRET_KEY,
 )
-from app.auth.domain.exceptions.invalid_credentials_exception import (
-    InvalidCredentialsException,
+from app.auth.domain.exceptions import (
+    InvalidTokenException,
 )
 
 
 class JwtHandler:
-    def create_access_token(
-        self, data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    ):
+    def create_access_and_refresh_tokens(self, data: dict):
         to_encode = data.copy()
-        expire = datetime.now() + expires_delta
+        expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         to_encode.update({"exp": expire})
-        try:
-            return jwt.encode(
-                to_encode, str(JWT_SECRET_KEY), algorithm=str(JWT_ALGORITHM)
-            )
-        except Exception as e:
-            raise e
+        token = jwt.encode(to_encode, str(JWT_SECRET_KEY), algorithm=str(JWT_ALGORITHM))
+        expire = datetime.now() + timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
+        to_encode.update({"exp": expire})
+        refresh_token = jwt.encode(
+            to_encode, str(JWT_SECRET_KEY), algorithm=str(JWT_ALGORITHM)
+        )
+        return token, refresh_token
 
     def decode_token(self, token: str):
-        try:
-            payload = jwt.decode(
-                token, str(JWT_SECRET_KEY), algorithms=[str(JWT_ALGORITHM)]
-            )
-            sub = payload.get("sub")
-            if sub is None:
-                raise InvalidCredentialsException()
-            return sub
-        except InvalidTokenError:
-            raise InvalidCredentialsException()
+        payload = jwt.decode(
+            token, str(JWT_SECRET_KEY), algorithms=[str(JWT_ALGORITHM)]
+        )
+        sub = payload.get("sub")
+        if sub is None:
+            raise InvalidTokenException()
+        return sub

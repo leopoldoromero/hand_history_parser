@@ -92,7 +92,7 @@ class HandJsonRepository(HandRepository):
                     return hand
         return None
 
-    async def get_all(self, user_id: str) -> List[Hand]:
+    async def get_all_by_user(self, user_id: str) -> List[Hand]:
         """Retrieve all hands for a specific user."""
         async with self._get_lock(user_id):
             return self._load_hands(user_id)

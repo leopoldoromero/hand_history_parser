@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, Cookie, Depends
+from fastapi import APIRouter, File, UploadFile, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from app.hand.infrastructure.dtos.upload_hands_response import UploadHandsResponseDto
 from app.history_parser.history_parser import HistoryParser
@@ -8,20 +8,27 @@ from app.hand.domain.hand_repository import (
     HandRepository,
 )
 from app.shared.infrastructure.di_container import get_dependency
+from app.shared.infrastructure.auth.get_optional_auth_user import get_optional_auth_user
+from app.shared.infrastructure.auth.extract_guest_id import extract_guest_id
+
+router = APIRouter()
 
 
-router = APIRouter(prefix="/v1", tags=["hands"])
-
-
-@router.post("/hands", response_model=UploadHandsResponseDto)
+@router.post("/", response_model=UploadHandsResponseDto)
 async def run(
     file: UploadFile = File(...),
-    user_id: str = Cookie(None),
+    guest_id: str = Depends(extract_guest_id),
     hands_repository: HandRepository = Depends(
         lambda: get_dependency("hands_repository")
     ),
+    user=Depends(get_optional_auth_user),
 ):
     try:
+        if not user and not guest_id:
+            raise HTTPException(status_code=401, detail="Missing token and guest_id")
+
+        user_id = user.id if user else guest_id
+
         AVAILABLE_FILE_FORMATS = ["text/plain"]
 
         if file.content_type not in AVAILABLE_FILE_FORMATS:

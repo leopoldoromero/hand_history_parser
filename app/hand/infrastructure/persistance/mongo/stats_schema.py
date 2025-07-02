@@ -1,10 +1,11 @@
 from pydantic import BaseModel
-from typing import Dict, Optional
+from typing import List, Optional
 from app.hand.domain.stats import PlayerStats
 from app.hand.domain.stats import Stats
 
 
 class PlayerStatsSchema(BaseModel):
+    name: str
     hands: int = 0
     fold: int = 0
     limp: int = 0
@@ -25,10 +26,12 @@ class PlayerStatsSchema(BaseModel):
     vpip: float = 0.0
     pfr: float = 0.0
     three_bet_percent: float = 0.0
+    is_hero: bool = False
 
     @staticmethod
     def from_domain(player_stats: PlayerStats) -> "PlayerStatsSchema":
         return PlayerStatsSchema(
+            name=player_stats.name,
             hands=player_stats.hands,
             fold=player_stats.fold,
             limp=player_stats.limp,
@@ -49,10 +52,12 @@ class PlayerStatsSchema(BaseModel):
             vpip=player_stats.vpip,
             pfr=player_stats.pfr,
             three_bet_percent=player_stats.three_bet_percent,
+            is_hero=player_stats.is_hero,
         )
 
     def to_domain(self) -> PlayerStats:
         return PlayerStats(
+            name=self.name,
             hands=self.hands,
             fold=self.fold,
             limp=self.limp,
@@ -73,30 +78,30 @@ class PlayerStatsSchema(BaseModel):
             vpip=self.vpip,
             pfr=self.pfr,
             three_bet_percent=self.three_bet_percent,
+            is_hero=self.is_hero,
         )
 
 
 class StatsSchema(BaseModel):
     user_id: str
-    stats: Dict[str, PlayerStatsSchema]
+    players_stats: List[PlayerStatsSchema]
 
     @staticmethod
     def from_domain(stats: Stats) -> "StatsSchema":
         """Convert domain Stats object into StatsSchema."""
         return StatsSchema(
             user_id=stats.user_id,
-            stats={
-                user_id: PlayerStatsSchema.from_domain(player_stats)
-                for user_id, player_stats in stats.stats.items()
-            },
+            players_stats=[
+                PlayerStatsSchema.from_domain(player_stats)
+                for player_stats in stats.players_stats
+            ],
         )
 
     def to_domain(self) -> Optional[Stats]:
         """Convert StatsSchema back to domain Stats object."""
         return Stats.create(
             self.user_id,
-            {
-                player_name: player_stats.to_domain()
-                for player_name, player_stats in self.stats.items()
-            },
+            players_stats=[
+                player_stats.to_domain() for player_stats in self.players_stats
+            ],
         )

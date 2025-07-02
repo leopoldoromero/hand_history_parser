@@ -1,8 +1,9 @@
 from pydantic import BaseModel
-from typing import Dict
+from typing import List
 
 
 class PlayerStatsResponse(BaseModel):
+    name: str
     hands: int
     # fold: int
     # limp: int
@@ -23,6 +24,7 @@ class PlayerStatsResponse(BaseModel):
     vpip: float
     pfr: float
     three_bet_percent: float
+    is_hero: bool
 
 
-GenerateStatsResponse = Dict[str, PlayerStatsResponse]
+GenerateStatsResponse = List[PlayerStatsResponse]
